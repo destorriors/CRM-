@@ -3,6 +3,7 @@ import ScheduleTable from "@/components/ScheduleTable.vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
 import { useRouter } from "vue-router";
 import EdittingModalWindow from "@/components/EdittingModalWindow.vue";
+import AddToQueueCustomer from "@/components/AddToQueueCustomer.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -23,10 +24,6 @@ const employee = scheduleStore.employees.find((emp) => {
 });
 
 const router = useRouter();
-
-function info(customer) {
-  console.log(customer);
-}
 </script>
 
 <template>
@@ -84,7 +81,7 @@ function info(customer) {
       <div v-else>
         <h2>Нет клиентов в очереди</h2>
       </div>
-      <button class="edit" @click="scheduleStore.showInput">
+      <button class="edit" @click="scheduleStore.openAddToQueueModalWindow">
         Добавить клиента в очередь
       </button>
     </div>
@@ -97,17 +94,11 @@ function info(customer) {
   <div>
     <ScheduleTable :employee="employee" />
   </div>
-  <!-- <AddCustomerModalWindow
-              v-if="
-                isTimeInWorkHours(day, time) &&
-                scheduleStore.isInputVisible(day, time)
-              "
-              :is-visible="scheduleStore.isInputVisible(day, time)"
-              :day="day"
-              :time="time"
-              @closeAddCustomers="scheduleStore.closeAddCustomers"
-              :employee-id="employee.id"
-            /> -->
+  <AddToQueueCustomer
+    v-if="scheduleStore.isAddToQueueModalVisible"
+    :employee-id="employeeNumber"
+    @close-add-customers="scheduleStore.closeAddToQueueModalWindow"
+  />
 </template>
 
 <style scoped>

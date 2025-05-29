@@ -138,17 +138,37 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     return employees.value.length;
   });
 
-  // ! Так же необходимо добавить создание новых специалистов и нормально оформить страницу employeeSchedule
-
   const customers = ref([
     {
       id: 1,
       parentName: "Ольга",
       name: "Клиент 1",
-      subscription: "Нейрик",
+      subscription: [
+        {
+          typeOfSubs: "Нейропсихолог",
+          timeSub: "45 минут",
+          howMuchSubLeft: 12,
+        },
+        {
+          typeOfSubs: "Логопед",
+          timeSub: "60 минут",
+          howMuchSubLeft: 8,
+        },
+        {
+          typeOfSubs: "Психолог",
+          timeSub: "60 минут",
+          howMuchSubLeft: 3,
+        },
+        {
+          typeOfSubs: "Дефектолог",
+          timeSub: "60 минут",
+          howMuchSubLeft: 5,
+        },
+      ],
       description: "Some description",
       specialistsId: [0, 5],
-      queueToEmployee: [0, 1, 5],
+      queueToEmployee: [1, 4, 3],
+      phoneNumber: "89099399999",
       schedule: [
         {
           day: "Понедельник",
@@ -192,10 +212,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 2,
       parentName: "Марина",
       name: "Клиент 2",
-      subscription: "Лого",
+      subscription: [
+        // {
+        //   typeOfSubs: ["Нейропсихолог"],
+        //   timeSub: ["45 минут"],
+        //   howMuchSubLeft: 12,
+        // },
+      ],
       description: "Some description",
       specialistsId: [1, 2, 3, 4],
-      queueToEmployee: [0, 1, 5],
+      queueToEmployee: [1, 5],
+      phoneNumber: "89099399999",
+
       schedule: [
         {
           day: "Вторник",
@@ -253,7 +281,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         },
         {
           day: "Вторник",
-          time: "08:15",
+          time: "10:00",
           employeeId: 2,
           description: "Что-то в дополнение 10",
         },
@@ -275,10 +303,36 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 3,
       parentName: "Хи",
       name: "Третий тест",
-      subscription: "Лого",
+      subscription: [
+        {
+          typeOfSubs: "Нейропсихолог",
+          timeSub: "45 минут",
+          howMuchSubLeft: 12,
+        },
+      ],
       description: "Some description",
       specialistsId: [],
-      queueToEmployee: [0, 1, 5],
+      queueToEmployee: [0],
+      phoneNumber: "89099399999",
+
+      schedule: [],
+    },
+    {
+      id: 4,
+      parentName: "питрпрол",
+      name: "Четвертый тест",
+      subscription: [
+        // {
+        //   typeOfSubs: "Нейропсихолог",
+        //   timeSub: "45 минут",
+        //   howMuchSubLeft: 12,
+        // },
+      ],
+      description: "Some description",
+      specialistsId: [],
+      queueToEmployee: [0, 5],
+      phoneNumber: "89099399999",
+
       schedule: [],
     },
   ]);
@@ -388,31 +442,88 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     childNameInput: "",
     parentName: "",
     description: "",
+    phoneNumber: "",
   });
 
-  // const childNameInput = ref("");
-  // const parentName = ref("");
-  // const description = ref("");
+  // function resetInputs() {
+  //   customerInputs.value = {
+  //     childNameInput: "",
+  //     parentName: "",
+  //     description: "",
+  //   };
+  // }
 
-  const toggleAddCustomer = ref(1);
+  const toggleAddCustomer = ref(2);
 
-  function toggleNew() {
-    toggleAddCustomer.value = 1;
+  function toggleNew(number) {
+    toggleAddCustomer.value = number;
     selectedCustomer.value = null;
   }
 
-  function toggleExist() {
-    toggleAddCustomer.value = 2;
-    selectedCustomer.value = null;
+  function resetAddCustomersInputs() {
+    customerInputs.value = {
+      childNameInput: "",
+      parentName: "",
+      description: "",
+      phoneNumber: "",
+    };
   }
 
-  function toggleQueue() {
-    toggleAddCustomer.value = 3;
-    selectedCustomer.value = null;
+  // ! Сделал общую функцию с клиентами, если что-то ебанет, то это из-за нее
+
+  const isAddModelVisible = ref(false);
+
+  function openAddModelWindow() {
+    isAddModelVisible.value = true;
   }
 
-  function addCustomers(employeeId, day, time) {
-    if (toggleAddCustomer.value === 1) {
+  function closeAddModalWindow() {
+    isAddModelVisible.value = false;
+    resetAddCustomersInputs();
+  }
+
+  function newCustomer(employeeId, day, time) {
+    const newCustomer = {
+      id: customers.value.length + 1,
+      name: customerInputs.value.childNameInput,
+      description: customerInputs.value.description,
+      parentName: customerInputs.value.parentName,
+      phoneNumber: customerInputs.value.phoneNumber,
+      subscription: [],
+      specialistsId: employeeId !== undefined ? [employeeId] : [],
+      schedule:
+        day && time !== undefined
+          ? [{ day: day, time: time, employeeId: employeeId }]
+          : [],
+      queueToEmployee: [],
+    };
+    return newCustomer;
+  }
+
+  // ! Главное добавление клиентов
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // ! Необходимо придумать, как объединить все функции добавления клиентов
+
+  // function addMainCustomers() {
+  //   if (
+  //     !customerInputs.value.childNameInput &&
+  //     !customerInputs.value.parentName
+  //   ) {
+  //     alert("Введите данные");
+  //   } else {
+  //     customers.value.push(newCustomer());
+
+  //     resetAddCustomersInputs();
+
+  //     console.log(customers.value);
+  //     closeAddCustomers();
+  //   }
+  // }
+
+  // !!1111111111111111111111111111111111111111111111111111111111111111111111111111
+
+  function addCustomers(employeeId, day, time, forMainMode) {
+    if (toggleAddCustomer.value === 1 || forMainMode) {
       // ! Режим новый
       if (
         !customerInputs.value.childNameInput &&
@@ -420,29 +531,43 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       ) {
         alert("Введите данные");
       } else {
-        const newCustomer = {
-          id: customers.value.length + 1,
-          name: customerInputs.value.childNameInput,
-          description: customerInputs.value.description,
-          parentName: customerInputs.value.parentName,
-          specialistsId: [employeeId],
-          schedule: [{ day: day, time: time, employeeId: employeeId }],
-        };
-        customers.value.push(newCustomer);
-        customerInputs.value = {
-          childNameInput: "",
-          parentName: "",
-          description: "",
-        };
+        // const newCustomer = {
+        //   id: customers.value.length + 1,
+        //   name: customerInputs.value.childNameInput,
+        //   description: customerInputs.value.description,
+        //   parentName: customerInputs.value.parentName,
+        //   phoneNumber: customerInputs.value.phoneNumber,
+        //   subscription: [],
+        //   specialistsId: [employeeId],
+        //   schedule: [{ day: day, time: time, employeeId: employeeId }],
+        //   queueToEmployee: [],
+        // };
+
+        customers.value.push(newCustomer(employeeId, day, time));
+
+        resetAddCustomersInputs();
 
         console.log(customers.value);
-        closeAddCustomers();
+
+        if (forMainMode) {
+          closeAddModalWindow();
+        } else {
+          closeAddCustomers();
+        }
       }
     } else if (toggleAddCustomer.value === 2) {
       //! Режим "Существующий"
       if (!selectedCustomer.value) {
         alert("Выберите клиента из списка");
         return;
+      }
+
+      const idx = selectedCustomer.value.queueToEmployee?.findIndex((val) => {
+        return val === employeeId;
+      });
+
+      if (selectedCustomer.value.queueToEmployee?.includes(idx)) {
+        selectedCustomer.value.queueToEmployee.splice(idx, 1);
       }
 
       // Добавляем новую пару день-время
@@ -490,6 +615,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   function closeAddCustomers() {
     activeCell.value = null; // Закрываем модальное окно
+    resetAddCustomersInputs();
   }
 
   // ! Удаление клиента из таблицы
@@ -547,7 +673,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     customers.value[index].parentName = edittingCustomer.value.parentName;
     customers.value[index].name = edittingCustomer.value.name;
     customers.value[index].description = edittingCustomer.value.description;
-    customers.value[index].subscription = edittingCustomer.value.subscription;
+    customers.value[index].phoneNumber = edittingCustomer.value.phoneNumber;
 
     const scheduleEntry = edittingCustomer.value.schedule[0];
     if (scheduleEntry) {
@@ -569,10 +695,108 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Добавление клиента в очередь к сотруднику
 
+  const selectedeInQueueCustomer = ref(null);
+
+  const customerToQueueInputs = ref({
+    childNameInput: "",
+    parentName: "",
+    description: "",
+  });
+
+  const toggleQueueAddToQueue = ref(1);
+
+  function toggleQueue(number) {
+    toggleQueueAddToQueue.value = number;
+    selectedCustomer.value = null;
+  }
+
+  const isAddToQueueModalVisible = ref(false);
+
+  function openAddToQueueModalWindow() {
+    isAddToQueueModalVisible.value = true;
+  }
+
+  function closeAddToQueueModalWindow() {
+    isAddToQueueModalVisible.value = false;
+    resetAddCustomersInputs();
+  }
+
   function getCustomersQueue(employeeNumber) {
     return customers.value.filter((cus) =>
       cus.queueToEmployee?.includes(employeeNumber)
     );
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  // ! Функция фильтрации селекта в очереди по наличию в расписании
+
+  function chooseCustomersInSelect(employeeId) {
+    const customersInSelect = customers.value.filter((cus) => {
+      return (
+        !cus.specialistsId?.includes(employeeId) ||
+        cus.specialistsId.length === 0
+      );
+    });
+
+    console.log(customersInSelect);
+
+    return customersInSelect;
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  function addCustomersToQueue(employeeId) {
+    if (toggleQueueAddToQueue.value === 1) {
+      // ! Режим новый
+
+      if (
+        !customerToQueueInputs.value.childNameInput &&
+        !customerToQueueInputs.value.parentName
+      ) {
+        alert("Введите данные");
+      } else {
+        const newCustomer = {
+          id: customers.value.length + 1,
+          name: customerToQueueInputs.value.childNameInput,
+          description: customerToQueueInputs.value.description,
+          parentName: customerToQueueInputs.value.parentName,
+          specialistsId: [employeeId],
+          schedule: [],
+          queueToEmployee: [employeeId],
+          subscription: [],
+        };
+        customers.value.push(newCustomer);
+        customerToQueueInputs.value = {
+          childNameInput: "",
+          parentName: "",
+          description: "",
+        };
+        console.log(customers.value);
+        closeAddToQueueModalWindow();
+      }
+    } else if (toggleQueueAddToQueue.value === 2) {
+      //! Режим "Существующий"
+
+      const customerIdx = customers.value.findIndex((val) => {
+        return val.id === selectedeInQueueCustomer.value.id;
+      });
+
+      if (customers.value[customerIdx].queueToEmployee?.includes(employeeId)) {
+        return;
+      } else {
+        customers.value[customerIdx].queueToEmployee.push(employeeId);
+        console.log(customers.value[customerIdx]);
+      }
+
+      console.log(selectedeInQueueCustomer.value);
+
+      console.log("Обновлённый список клиентов в очереди:", customers.value);
+      selectedeInQueueCustomer.value = null; // Сбрасываем выбор
+      closeAddToQueueModalWindow();
+    }
   }
 
   // ! Удаление клиента из очереди сотрудника
@@ -781,6 +1005,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     };
 
     console.log(newEmployee);
+    console.log(temporaryData.value.speciality);
 
     employees.value.push(newEmployee);
 
@@ -801,6 +1026,10 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       img: "",
     };
     mode.value = null;
+  }
+
+  function removeEmployeeSpecialityForAdd(specialityIndex) {
+    temporaryData.value.speciality.splice(specialityIndex, 1);
   }
 
   // ! Функции получения времени для добавления и редактирования сотрудника, а так же для селекта
@@ -859,6 +1088,430 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     }
   };
 
+  // ! Боковая панель с направлениями
+
+  // ! Добавление специализации в боковую панель
+
+  function transliterate(text) {
+    // Маппинг кириллицы на латиницу
+    const cyrillicToLatinMap = {
+      а: "a",
+      б: "b",
+      в: "v",
+      г: "g",
+      д: "d",
+      е: "e",
+      ё: "yo",
+      ж: "zh",
+      з: "z",
+      и: "i",
+      й: "y",
+      к: "k",
+      л: "l",
+      м: "m",
+      н: "n",
+      о: "o",
+      п: "p",
+      р: "r",
+      с: "s",
+      т: "t",
+      у: "u",
+      ф: "f",
+      х: "kh",
+      ц: "ts",
+      ч: "ch",
+      ш: "sh",
+      щ: "shch",
+      ъ: "",
+      ы: "y",
+      ь: "",
+      э: "e",
+      ю: "yu",
+      я: "ya",
+      " ": "_", // Пробелы заменяем на подчёркивание
+      "-": "_", // Дефисы заменяем на подчёркивание
+    };
+
+    // Приводим к нижнему регистру и заменяем символы
+    return text
+      .toLowerCase()
+      .split("")
+      .map((char) => cyrillicToLatinMap[char] || char) // Если символа нет в маппинге, оставляем его как есть
+      .join("")
+      .replace(/[^a-z0-9_]/g, ""); // Удаляем всё, кроме букв, цифр и подчёркиваний
+  }
+
+  const specialization = ref([
+    { id: 0, forRouterPath: "neuro", name: "Нейропсихолог" },
+    { id: 1, forRouterPath: "logo", name: "Логопед-дефектолог" },
+    { id: 2, forRouterPath: "defectologist", name: "Дефектолог" },
+    { id: 3, forRouterPath: "psychologist", name: "Психолог" },
+    { id: 4, forRouterPath: "neurologist", name: "Невролог" },
+    { id: 5, forRouterPath: "psychiatrist", name: "Психиатр" },
+    { id: 6, forRouterPath: "epileptologist", name: "Эпилептолог" },
+    { id: 7, forRouterPath: "osteopath", name: "Остеопат" },
+  ]);
+
+  const isAddButtonShown = ref(false);
+
+  function showAddInput() {
+    isAddButtonShown.value = !isAddButtonShown.value;
+  }
+
+  const addSpecialistInput = ref("");
+
+  function addSpecialist() {
+    isAddButtonShown.value = false;
+    console.log(addSpecialistInput.value);
+    specialization.value.push({
+      id: specialization.value.length + 1,
+      forRouterPath: transliterate(addSpecialistInput.value),
+      name: addSpecialistInput.value,
+    });
+
+    console.log(specialization.value);
+    addSpecialistInput.value = "";
+  }
+
+  // ! Удаление направления
+
+  const isDeleteButtonShown = ref(false);
+
+  function showDeleteButton() {
+    isDeleteButtonShown.value = !isDeleteButtonShown.value;
+  }
+
+  function removeSpec(specId) {
+    console.log(specId);
+    const idx = specialization.value.findIndex((val) => {
+      return val.id === specId;
+    });
+    console.log(idx);
+
+    specialization.value.splice(idx, 1);
+    isDeleteButtonShown.value = false;
+  }
+
+  // ! Добавление занятие в абонемент
+
+  function addLessonForSub(customerId, subscriptionIdx) {
+    const customer = customers.value.find((val) => {
+      return val.id === customerId;
+    });
+
+    const subIdx = subscriptionIdx;
+
+    console.log(subIdx);
+
+    const limit = 30;
+
+    if (customer.subscription[subIdx].howMuchSubLeft === limit) {
+      alert("Видит");
+      return;
+    } else {
+      customer.subscription[subIdx].howMuchSubLeft =
+        customer.subscription[subIdx].howMuchSubLeft + 1;
+    }
+  }
+
+  // ! Убирание занятия из абонемента
+
+  function findCustomer(customerId) {
+    const customer = customers.value.find((val) => {
+      return val.id === customerId;
+    });
+    return customer;
+  }
+
+  function removeLessonForSub(customerId, subscriptionIdx) {
+    // const customer = customers.value.find((val) => {
+    //   return val.id === customerId;
+    // });
+    const customer = findCustomer(customerId);
+
+    const subIdx = subscriptionIdx;
+
+    const limit = 1;
+
+    if (customer.subscription[subIdx].howMuchSubLeft <= limit) {
+      customer.subscription.splice(subIdx, 1);
+      return;
+    } else {
+      customer.subscription[subIdx].howMuchSubLeft =
+        customer.subscription[subIdx].howMuchSubLeft - 1;
+    }
+  }
+
+  // ! Создание абонемента
+
+  const subTime = ref([
+    {
+      id: 0,
+      name: "30 минут",
+    },
+    {
+      id: 1,
+      name: "45 минут",
+    },
+    {
+      id: 2,
+      name: "60 минут",
+    },
+  ]);
+
+  const subsSelects = ref({
+    subDirectionSelect: "",
+    subTimeSelect: "",
+    subQuantity: 0,
+  });
+
+  // const temporarySubCustomer = ref(null)
+
+  function resetSubsSelects() {
+    subsSelects.value = {
+      subDirectionSelect: "",
+      subTimeSelect: "",
+      subQuantity: 0,
+    };
+  }
+
+  const newSubIsOpen = ref(false);
+
+  function openSubModal() {
+    newSubIsOpen.value = true;
+  }
+
+  function closeSubModal() {
+    newSubIsOpen.value = false;
+    resetSubsSelects();
+  }
+
+  // subscription: [
+  //   {
+  //     typeOfSubs: "Нейропсихолог",
+  //     timeSub: "45 минут",
+  //     howMuchSubLeft: 12,
+  //   },
+  //   {
+  //     typeOfSubs: "Логопед",
+  //     timeSub: "60 минут",
+  //     howMuchSubLeft: 8,
+  //   },
+  // ],
+
+  function saveAddNewSubToCustomer(customerId) {
+    const customer = findCustomer(customerId);
+
+    // if(!subsSelects.value.subDirectionSelect){
+    //   return
+    // }else if(!subsSelects.value.subTimeSelect){
+    // return
+    // }else if(!subsSelects.value.subQuantity){
+    //   return
+    // }
+
+    // ! Остановился на валидации, нужно сделать не так колхозно как выше, а в одну строчку
+    // ! Так же кнопку нужно заблокировать при недостатке инпутов
+
+    if (
+      !subsSelects.value.subDirectionSelect ||
+      !subsSelects.value.subTimeSelect ||
+      subsSelects.value.subQuantity === 0
+    ) {
+      return;
+    }
+
+    const newSub = {
+      typeOfSubs: subsSelects.value.subDirectionSelect,
+      timeSub: subsSelects.value.subTimeSelect,
+      howMuchSubLeft: subsSelects.value.subQuantity,
+    };
+
+    customer.subscription.push(newSub);
+
+    console.log(customer);
+
+    resetSubsSelects();
+
+    closeSubModal();
+  }
+
+  // ! Цены
+
+  const priceList = ref([
+    {
+      id: 0,
+      category: "Нейропсихолог",
+      timeOptions: [
+        {
+          timeOfSub: 30,
+          singleCost: 1500,
+          subSingleLessonCost: 1300,
+          subCost: 7600,
+          subCountOfLessons: 4,
+        },
+        {
+          timeOfSub: 45,
+          singleCost: 1700,
+          subSingleLessonCost: 1500,
+          subCost: 6700,
+          subCountOfLessons: 4,
+        },
+      ],
+    },
+    {
+      id: 1,
+      category: "Логопед-дефектолог",
+      timeOptions: [
+        {
+          timeOfSub: 30,
+          singleCost: 1500,
+          subSingleLessonCost: 1300,
+          subCost: 7600,
+          subCountOfLessons: 4,
+        },
+        {
+          timeOfSub: 45,
+          singleCost: 1700,
+          subSingleLessonCost: 1500,
+          subCost: 6700,
+          subCountOfLessons: 4,
+        },
+      ],
+    },
+  ]);
+
+  // ! Редактирование цены
+
+  const isEdittingPrice = ref(false);
+
+  const idxAndIdofPrice = ref({
+    idx: 0,
+    id: 0,
+  });
+
+  const temporaryEdittingTimeOption = ref({
+    timeOfSub: 0,
+    singleCost: 0,
+    subSingleLessonCost: 0,
+    subCost: 0,
+    subCountOfLessons: 0,
+  });
+
+  function resetTemporaryEdittingTimeOption() {
+    temporaryEdittingTimeOption.value = {
+      timeOfSub: 0,
+      singleCost: 0,
+      subSingleLessonCost: 0,
+      subCost: 0,
+      subCountOfLessons: 0,
+    };
+
+    idxAndIdofPrice.value = {
+      idx: 0,
+      id: 0,
+    };
+  }
+
+  function findPriceItem(priceId) {
+    const findedPriceItem = priceList.value.find((val) => {
+      return val.id === priceId;
+    });
+
+    return findedPriceItem;
+  }
+
+  // ! Открытие модалки редактирования цены
+
+  function openEditPrice(editOptionIdx, priceId) {
+    isEdittingPrice.value = true;
+
+    idxAndIdofPrice.value = {
+      idx: editOptionIdx,
+      id: priceId,
+    };
+
+    console.log(idxAndIdofPrice.value);
+
+    temporaryEdittingTimeOption.value = {
+      ...findPriceItem(priceId).timeOptions[editOptionIdx],
+    };
+    console.log(temporaryEdittingTimeOption.value);
+  }
+
+  // ! Закрытие модалки редактирования цены
+
+  function closeEditPrice() {
+    isEdittingPrice.value = false;
+    resetTemporaryEdittingTimeOption();
+  }
+
+  // ! Сохранение редактирования
+
+  function saveEdittingPrice(editOptionIdx, priceId, addTimeInPriceOptionMode) {
+    const newPriceData = { ...temporaryEdittingTimeOption.value };
+    console.log(newPriceData);
+
+    const calculateHowWillCostSub = Math.trunc(
+      temporaryEdittingTimeOption.value.subSingleLessonCost *
+        temporaryEdittingTimeOption.value.subCountOfLessons
+    );
+
+    console.log(calculateHowWillCostSub);
+
+    if (addTimeInPriceOptionMode) {
+      console.log(findPriceItem(priceId));
+
+      findPriceItem(priceId).timeOptions.push({
+        ...newPriceData,
+        subCost: calculateHowWillCostSub,
+      });
+
+      closeAddTimeInPriceOption();
+
+      console.log("Все абики", priceList.value);
+
+      return;
+    } else {
+      findPriceItem(priceId).timeOptions[editOptionIdx] = {
+        ...newPriceData,
+        subCost: calculateHowWillCostSub,
+      };
+    }
+
+    console.log("Работает");
+
+    closeEditPrice();
+  }
+
+  // ! Добавить время в категорию
+
+  const isAddTimeInPriceOption = ref(false);
+
+  function openAddTimeInPriceOption(itemId) {
+    isAddTimeInPriceOption.value = true;
+    idxAndIdofPrice.value.id = itemId;
+  }
+
+  function closeAddTimeInPriceOption() {
+    isAddTimeInPriceOption.value = false;
+    resetTemporaryEdittingTimeOption();
+  }
+
+  // isEdittingPrice.value = true;
+
+  // idxAndIdofPrice.value = {
+  //   idx: editOptionIdx,
+  //   id: priceId,
+  // };
+
+  // console.log(idxAndIdofPrice.value);
+
+  // temporaryEdittingTimeOption.value = {
+  //   ...findPriceItem(priceId).timeOptions[editOptionIdx],
+  // };
+  // console.log(temporaryEdittingTimeOption.value);
+
   return {
     employees,
     customers,
@@ -904,6 +1557,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     timeOptions,
     onStartTimeChange,
     mode,
+    removeEmployeeSpecialityForAdd,
 
     // currentSpeciality,
     // specialityMap,
@@ -916,14 +1570,63 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     toggleAddCustomer,
     toggleNew,
-    toggleExist,
     addCustomers,
     customerInputs,
+    resetAddCustomersInputs,
 
     // ! Очередь
 
+    customerToQueueInputs,
+    toggleQueueAddToQueue,
     getCustomersQueue,
     toggleQueue,
     removeFromEmployeeQueue,
+    isAddToQueueModalVisible,
+    openAddToQueueModalWindow,
+    closeAddToQueueModalWindow,
+    addCustomersToQueue,
+    selectedeInQueueCustomer,
+    chooseCustomersInSelect,
+
+    // ! Боковая панель со специалистами
+
+    specialization,
+    addSpecialistInput,
+    addSpecialist,
+    isAddButtonShown,
+    showAddInput,
+    removeSpec,
+    isDeleteButtonShown,
+    showDeleteButton,
+
+    // ! Модальное окно UI
+
+    isAddModelVisible,
+    openAddModelWindow,
+    closeAddModalWindow,
+
+    // ! Абонементы
+
+    addLessonForSub,
+    removeLessonForSub,
+    subTime,
+    subsSelects,
+    newSubIsOpen,
+    openSubModal,
+    closeSubModal,
+    saveAddNewSubToCustomer,
+
+    // ! Цены
+
+    priceList,
+    isEdittingPrice,
+    openEditPrice,
+    closeEditPrice,
+    temporaryEdittingTimeOption,
+    saveEdittingPrice,
+    idxAndIdofPrice,
+    isAddTimeInPriceOption,
+    openAddTimeInPriceOption,
+    closeAddTimeInPriceOption,
   };
 });

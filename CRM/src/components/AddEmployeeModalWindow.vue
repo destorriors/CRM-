@@ -3,16 +3,16 @@ import { useScheduleStore } from "@/stores/scheduleStore";
 
 const scheduleStore = useScheduleStore();
 
-const specs = [
-  "Нейропсихолог",
-  "Логопед-дефектолог",
-  "Дефектолог",
-  "Психолог",
-  "Невролог",
-  "Психиатр",
-  "Эпилептолог",
-  "Остеопат",
-];
+// const specs = [
+//   "Нейропсихолог",
+//   "Логопед-дефектолог",
+//   "Дефектолог",
+//   "Психолог",
+//   "Невролог",
+//   "Психиатр",
+//   "Эпилептолог",
+//   "Остеопат",
+// ];
 
 // const days = [
 //   "Понедельник",
@@ -104,11 +104,11 @@ const specs = [
               >
                 <option value="" disabled>Не выбрано</option>
                 <option
-                  v-for="spec in specs"
-                  :key="`${spec}-${index + 1}`"
-                  :value="spec"
+                  v-for="spec in scheduleStore.specialization"
+                  :key="`${spec.id}-${index + 1}`"
+                  :value="spec.name"
                 >
-                  {{ spec }}
+                  {{ spec.name }}
                 </option>
               </select>
               <button
@@ -116,7 +116,9 @@ const specs = [
                   index > 0 && scheduleStore.temporaryData.speciality[index]
                 "
                 class="remove"
-                @click.prevent="scheduleStore.removeEmployeeSpeciality(index)"
+                @click.prevent="
+                  scheduleStore.removeEmployeeSpecialityForAdd(index)
+                "
               >
                 Х
               </button>

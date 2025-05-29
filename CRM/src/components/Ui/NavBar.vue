@@ -10,8 +10,11 @@
     <router-link to="/employees" class="card">
       <p>Специалисты</p>
     </router-link>
-    <router-link to="false" class="card">
-      <p>Абонементы</p>
+    <router-link to="/customers" class="card">
+      <p>Клиенты</p>
+    </router-link>
+    <router-link to="/price" class="card">
+      <p>Цены</p>
     </router-link>
     <router-link to="false" class="card">
       <p>Зарплата</p>

@@ -15,30 +15,40 @@ const props = defineProps({
 
 console.log(props.speciality);
 
-const speciality = {
-  neuro: "Нейропсихолог",
-  logo: "Логопед-дефектолог",
-  defectologist: "Дефектолог",
-  psychologist: "Психолог",
-  neurologist: "Невролог",
-  psychiatrist: "Психиатр",
-  epileptologist: "Эпилептолог",
-  osteopath: "Остеопат",
-};
+// const speciality = {
+//   neuro: "Нейропсихолог",
+//   logo: "Логопед-дефектолог",
+//   defectologist: "Дефектолог",
+//   psychologist: "Психолог",
+//   neurologist: "Невролог",
+//   psychiatrist: "Психиатр",
+//   epileptologist: "Эпилептолог",
+//   osteopath: "Остеопат",
+// };
 
-console.log(speciality[props.speciality]);
+// console.log(speciality[props.speciality]);
+
+const specialityName = computed(() => {
+  const specialityObj = scheduleStore.specialization.find(
+    (spec) => spec.forRouterPath === props.speciality
+  );
+  return specialityObj ? specialityObj.name : "Неизвестная специальность";
+});
 
 const spec = computed(() => {
   return scheduleStore.employees.filter((e) => {
-    return e.speciality?.includes(speciality[props.speciality]);
+    return e.speciality?.includes(specialityName.value);
   });
 });
 </script>
 
+<!-- ! Необходимо поменять speciality[props.speciality] на scheduleStore.specialization[0].name-->
+<!-- ! Понять как перебрать массив -->
+
 <template>
   <div>
     <div class="header-container">
-      <h1>{{ speciality[props.speciality] }} ({{ spec.length }})</h1>
+      <h1>{{ specialityName }} ({{ spec.length }})</h1>
       <button class="btn-add-employee" @click="scheduleStore.openAddEmployee">
         Добавить специалиста
       </button>

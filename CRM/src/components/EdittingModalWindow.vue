@@ -1,6 +1,4 @@
 <script setup>
-// Код компонента (EdittingModalWindow.vue)
-import { computed } from "vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
 
 const scheduleStore = useScheduleStore();
@@ -9,7 +7,6 @@ const props = defineProps({
   employee: {
     type: Object,
     required: true,
-    default: () => ({}),
   },
 });
 
@@ -78,16 +75,16 @@ function closeModal() {
 //   scheduleStore.saveEdittingEmployee();
 // }
 
-const specs = [
-  "Нейропсихолог",
-  "Логопед-дефектолог",
-  "Дефектолог",
-  "Психолог",
-  "Невролог",
-  "Психиатр",
-  "Эпилептолог",
-  "Остеопат",
-];
+// const specs = [
+//   "Нейропсихолог",
+//   "Логопед-дефектолог",
+//   "Дефектолог",
+//   "Психолог",
+//   "Невролог",
+//   "Психиатр",
+//   "Эпилептолог",
+//   "Остеопат",
+// ];
 </script>
 
 <template>
@@ -129,11 +126,11 @@ const specs = [
                 >
                   <option value="" disabled>Не выбрано</option>
                   <option
-                    v-for="spec in specs"
-                    :key="`${spec}-${index + 1}`"
-                    :value="spec"
+                    v-for="spec in scheduleStore.specialization"
+                    :key="`${spec.id}-${index + 1}`"
+                    :value="spec.name"
                   >
-                    {{ spec }}
+                    {{ spec.name }}
                   </option>
                 </select>
                 <button

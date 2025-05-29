@@ -1,5 +1,8 @@
 <script setup>
 import { useRouter, useRoute } from "vue-router";
+import { useScheduleStore } from "@/stores/scheduleStore";
+
+const scheduleStore = useScheduleStore();
 
 const props = defineProps({
   employee: {
@@ -33,11 +36,24 @@ function routeToSchedule(employeeId) {
         </p>
       </div>
     </div>
+
+    <div v-if="scheduleStore.getCustomersQueue(employee.id).length !== 0">
+      <h3 class="queue">
+        <strong
+          >Клиенты в очереди (
+          {{ scheduleStore.getCustomersQueue(employee.id).length }} ) !</strong
+        >
+      </h3>
+    </div>
+
     <button @click="routeToSchedule(employee.id)">Открыть расписание</button>
   </div>
 </template>
 
 <style scoped>
+.queue {
+  color: rgb(244, 81, 102);
+}
 .days-of-work {
   text-align: center;
 }

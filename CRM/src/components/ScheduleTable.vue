@@ -91,7 +91,6 @@ const props = defineProps({
   employee: {
     type: Object,
     required: true,
-    default: () => {},
   },
 });
 

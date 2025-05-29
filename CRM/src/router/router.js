@@ -3,6 +3,9 @@ import DailySchedule from "@/views/DailySchedule.vue";
 import Employees from "@/views/Employees.vue";
 import EmployeeList from "@/views/EmployeeList.vue";
 import EmployeeSchedule from "@/views/EmployeeSchedule.vue";
+import CustomersList from "@/components/CustomersList.vue";
+import CustomerPage from "@/views/CustomerPage.vue";
+import Price from "@/views/Price.vue";
 
 const routes = [
   {
@@ -12,6 +15,10 @@ const routes = [
   {
     path: "/employees",
     component: Employees,
+
+    // ! Необходимо сделать универсальный переход по специальности
+    // ! Вместо статичного "/employees/neuro", что-то другое
+
     redirect: "/employees/neuro",
     children: [
       {
@@ -25,6 +32,21 @@ const routes = [
         props: true,
       },
     ],
+  },
+  {
+    path: "/customers",
+    component: CustomersList,
+    children: [
+      {
+        path: ":customerId",
+        component: CustomerPage,
+        props: true,
+      },
+    ],
+  },
+  {
+    path: "/price",
+    component: Price,
   },
 ];
 

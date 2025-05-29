@@ -31,7 +31,7 @@
           />
         </div>
 
-        <div class="card" v-if="day && time">
+        <div class="card note" v-if="day && time">
           <strong>Заметка на этот день :</strong>
           <span v-if="!scheduleStore.isEditting">
             {{ getScheduleEntry(customer)?.description || "Не указано" }}</span
@@ -46,25 +46,45 @@
           />
         </div>
 
-        <div class="card">
+        <div
+          class="card"
+          v-if="
+            !scheduleStore.isEditting &&
+            !edittingFromMain &&
+            customer.subscription.length !== 0
+          "
+        >
           <strong>Абонемент:</strong>
-          <span v-if="!scheduleStore.isEditting">
-            {{ customer.subscription || "Не указан" }}
+          <span v-for="(sub, idx) in customer.subscription" :key="sub + idx">
+            {{ sub.typeOfSubs }} ({{ sub.timeSub }}, {{ sub.howMuchSubLeft }})
+            {{ idx < customer.subscription.length - 1 ? "," : "" }}
           </span>
-          <input
-            type="text"
-            class="edit-input"
-            v-else
-            v-model="scheduleStore.edittingCustomer.subscription"
-          />
         </div>
 
-        <!-- ! Разобаться со специалистом, как организовывать логику -->
+        <div
+          class="card"
+          v-if="
+            !scheduleStore.isEditting &&
+            !edittingFromMain &&
+            customer.subscription.length === 0
+          "
+        >
+          <strong>Абонемент:</strong>
+          <span>Нет абонемента !</span>
+        </div>
 
-        <p>
-          <strong>Специалист:</strong>
-          {{ customer.specialist || "Не назначен" }}
-        </p>
+        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
+        <div class="card" v-if="!scheduleStore.isEditting && !edittingFromMain">
+          <strong>Специалисты:</strong>
+          <span v-for="(spec, idx) in specs" :key="spec.id">
+            {{ spec.name }} {{ idx < specs.length - 1 ? "," : "" }}
+          </span>
+        </div>
+
+        <!-- ! Остановился на линке и логики перехода между спецами -->
+        <!-- ! Вместо этого раньше был span, если эта залупа не приготится, но сноси все нахуй и убери функции - хуюнции от линка -->
+
         <div class="card">
           <strong>Комментарий:</strong>
           <span v-if="!scheduleStore.isEditting">
@@ -77,6 +97,18 @@
             class="edit-input"
             v-else
             v-model="scheduleStore.edittingCustomer.description"
+          />
+        </div>
+        <div class="card">
+          <strong>Телефон: </strong>
+          <span v-if="!scheduleStore.isEditting">{{
+            customer.phoneNumber
+          }}</span>
+          <input
+            type="text"
+            class="edit-input"
+            v-else
+            v-model="scheduleStore.edittingCustomer.phoneNumber"
           />
         </div>
       </div>
@@ -93,14 +125,14 @@
           Редактировать
         </button>
         <button
-          v-if="day && time"
+          v-if="day && time && !edittingFromMain"
           class="delete-button"
           @click="scheduleStore.removeCustomer(customer, day, time, employeeId)"
         >
           Удалить из расписания
         </button>
         <button
-          v-else
+          v-else-if="!day && !time && !edittingFromMain"
           class="delete-button"
           @click="scheduleStore.removeFromEmployeeQueue(employeeId)"
         >
@@ -127,7 +159,7 @@ const props = defineProps({
   customer: {
     type: [Object, null],
     required: true,
-    default: () => ({ name: "", subscription: "", specialist: "" }),
+    default: () => ({}),
   },
   day: {
     type: String,
@@ -137,7 +169,10 @@ const props = defineProps({
   },
   employeeId: {
     type: Number,
-    required: true,
+  },
+  edittingFromMain: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -169,9 +204,41 @@ const scheduleIndex = computed(() => {
       s.employeeId === props.employeeId
   );
 });
+
+const specs = computed(() => {
+  if (!props.customer) {
+    return;
+  }
+  return scheduleStore.employees.filter((val) => {
+    return props.customer.specialistsId.includes(val.id);
+  });
+});
+
+// const specs = computed(() => {
+//   if (
+//     !props.customer?.specialistsId ||
+//     !Array.isArray(props.customer.specialistsId)
+//   ) {
+//     return [];
+//   }
+//   return scheduleStore.employees.filter((val) =>
+//     props.customer.specialistsId.includes(val.id)
+//   );
+// });
+
+// function getSpecForRouter(spec) {
+//   const foundRouteObject = scheduleStore.specialization.find((val) => {
+//     return val.name === spec;
+//   });
+//   return foundRouteObject.forRouterPath;
+// }
 </script>
 
 <style scoped>
+.note {
+  color: red;
+  font-weight: bold;
+}
 .client-info .description {
   color: rgb(242, 180, 188);
 }

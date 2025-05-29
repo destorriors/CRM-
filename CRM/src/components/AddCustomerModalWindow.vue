@@ -1,5 +1,6 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
+import AddNewCustomerComponent from "./AddNewCustomerComponent.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -106,28 +107,28 @@ function closeAddCustomers() {
         <h3>Добавить клиента</h3>
         <button
           class="btn2"
-          @click="scheduleStore.toggleNew"
+          @click="scheduleStore.toggleNew(1)"
           :class="{ active: scheduleStore.toggleAddCustomer === 1 }"
         >
           Новый
         </button>
         <button
           class="btn2"
-          @click="scheduleStore.toggleExist"
+          @click="scheduleStore.toggleNew(2)"
           :class="{ active: scheduleStore.toggleAddCustomer === 2 }"
         >
           Существующий
         </button>
         <button
           class="btn3"
-          @click="scheduleStore.toggleQueue"
+          @click="scheduleStore.toggleNew(3)"
           :class="{ active: scheduleStore.toggleAddCustomer === 3 }"
           v-if="scheduleStore.getCustomersQueue(props.employeeId).length !== 0"
         >
           В очереди
         </button>
       </div>
-      <form
+      <!-- <form
         @submit.prevent="
           scheduleStore.addCustomers(props.employeeId, props.day, props.time)
         "
@@ -152,7 +153,15 @@ function closeAddCustomers() {
           />
         </div>
         <div>
-          <label for="description">Описание </label>
+          <label for="phoneNumber">Номер телефона </label>
+          <input
+            type="text"
+            id="phoneNumber"
+            v-model="scheduleStore.customerInputs.phoneNumber"
+          />
+        </div>
+        <div>
+          <label for="description">Комментарий </label>
           <input
             type="text"
             id="description"
@@ -166,7 +175,19 @@ function closeAddCustomers() {
         >
           Добавить
         </button>
-      </form>
+      </form> -->
+
+      <AddNewCustomerComponent
+        v-if="scheduleStore.toggleAddCustomer === 1"
+        :day="props.day"
+        :employee-id="props.employeeId"
+        :time="props.time"
+        :for-main="false"
+        @add-customers="
+          scheduleStore.addCustomers(props.employeeId, props.day, props.time)
+        "
+      />
+
       <form
         @submit.prevent="
           scheduleStore.addCustomers(props.employeeId, props.day, props.time)
@@ -399,8 +420,3 @@ form button[type="submit"]:hover {
   background: #2fc24f;
 }
 </style>
-
-<!-- ! Разобраться с тем, как добавлять клиентов в очередь -->
-<!-- ! Надо или не надо модалку создавать новую, хуй пойми -->
-<!-- ! Там зависимость от selectesCustomer, необходимо допереть что с этим говном делать -->
-<!-- ! Создать репозиторий и скинуть туда все проекты -->
