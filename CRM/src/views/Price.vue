@@ -29,14 +29,18 @@ const scheduleStore = useScheduleStore();
 </script>
 
 <template>
-  <h1>Сюда нужно что-нибудь вставить</h1>
-  <div class="mainCard" v-for="item in scheduleStore.priceList" :key="item.id">
+  <h1>Сюда нужно вставить компонент с поиском</h1>
+  <div
+    class="mainCard"
+    v-for="(item, idx) in scheduleStore.priceList"
+    :key="item.id"
+  >
     <h2>{{ item.category }}</h2>
     <div class="main-buttons">
       <my-button-template
         class="addTime"
         @click="scheduleStore.openAddTimeInPriceOption(item.id)"
-        >Добавить время</my-button-template
+        >Добавить услугу</my-button-template
       >
       <my-button-template class="addTime"
         >Поднять цену на категорию</my-button-template
@@ -44,18 +48,30 @@ const scheduleStore = useScheduleStore();
       <my-button-template class="addTime"
         >Опустить цену на категорию</my-button-template
       >
+      <my-button-template :red="true" @click="scheduleStore.deleteCategory(idx)"
+        >Удалить категорию</my-button-template
+      >
+    </div>
+
+    <div v-if="item.timeOptions.length === 0">
+      <h2>Добавьте услугу</h2>
     </div>
 
     <div class="cards" v-for="(option, idx) in item.timeOptions">
-      <p>Время занятия: {{ option.timeOfSub }} мин</p>
+      <h2 v-if="option.name">{{ option.name }}</h2>
+      <p v-if="option.timeOfSub != 0">
+        Время услуги: {{ option.timeOfSub }} мин
+      </p>
       <p>Разовая стоимость: {{ option.singleCost }}</p>
-      <p>
-        Разовая стоимость занятия по абонементу:
+      <p v-if="!option.withoutSub">
+        Разовая стоимость услуги по абонементу:
         {{ option.subSingleLessonCost }}
       </p>
-      <p>Стоимость абонемента: {{ option.subCost }}</p>
-      <p>
-        Количество занятий в абонементе:
+      <p v-if="!option.withoutSub">
+        Стоимость абонемента: {{ option.subCost }}
+      </p>
+      <p v-if="!option.withoutSub">
+        Количество услуг в абонементе:
         {{ option.subCountOfLessons }}
       </p>
       <my-button-template
@@ -76,7 +92,7 @@ const scheduleStore = useScheduleStore();
     </modal-template>
     <modal-template
       :is-visible="scheduleStore.isAddTimeInPriceOption"
-      title="Добавление времени"
+      title="Добавление услуги"
       @close="scheduleStore.closeAddTimeInPriceOption"
     >
       <EditPriceInputDataTemplate
@@ -85,9 +101,19 @@ const scheduleStore = useScheduleStore();
       />
     </modal-template>
   </div>
+  <my-button-template class="add-category"
+    >Добавить категорию</my-button-template
+  >
 </template>
 
 <style scoped>
+.add-category {
+  display: block; /* Убеждаемся, что кнопка — блочный элемент */
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  height: 50px;
+}
 .main-buttons {
   display: flex;
 }
@@ -117,5 +143,7 @@ const scheduleStore = useScheduleStore();
 </style>
 
 <!-- ! Остановился на том, что нужно доделать кнопки поднять цену и опустить -->
-<!-- ! Так же надо подумать над ценами на разовое обращение без абонементной системы, для врачей например это будет нужно -->
 <!-- ! Так же необходимо добавить кнопку с добавлением новой категории и поиск категории по названию -->
+<!-- ! Сделать отдельный компонент с карточкой -->
+<!-- ! Нужно деструктуризировать компонент -->
+<!-- ! Потом необходимо подвязать цены со страницей клиентов -->

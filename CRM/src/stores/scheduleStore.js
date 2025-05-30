@@ -1344,18 +1344,22 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       category: "Нейропсихолог",
       timeOptions: [
         {
+          name: "",
           timeOfSub: 30,
           singleCost: 1500,
           subSingleLessonCost: 1300,
           subCost: 7600,
           subCountOfLessons: 4,
+          withoutSub: false,
         },
         {
+          name: "",
           timeOfSub: 45,
           singleCost: 1700,
           subSingleLessonCost: 1500,
           subCost: 6700,
           subCountOfLessons: 4,
+          withoutSub: false,
         },
       ],
     },
@@ -1364,22 +1368,30 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       category: "Логопед-дефектолог",
       timeOptions: [
         {
+          name: "",
           timeOfSub: 30,
           singleCost: 1500,
           subSingleLessonCost: 1300,
           subCost: 7600,
           subCountOfLessons: 4,
+          withoutSub: false,
         },
         {
+          name: "",
           timeOfSub: 45,
           singleCost: 1700,
           subSingleLessonCost: 1500,
           subCost: 6700,
           subCountOfLessons: 4,
+          withoutSub: false,
         },
       ],
     },
   ]);
+
+  // ! Без абонемента
+
+  const withoutSub = ref(false);
 
   // ! Редактирование цены
 
@@ -1396,6 +1408,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     subSingleLessonCost: 0,
     subCost: 0,
     subCountOfLessons: 0,
+    withoutSub: false,
+    name: "",
   });
 
   function resetTemporaryEdittingTimeOption() {
@@ -1405,6 +1419,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       subSingleLessonCost: 0,
       subCost: 0,
       subCountOfLessons: 0,
+      withoutSub: false,
+      name: "",
     };
 
     idxAndIdofPrice.value = {
@@ -1412,6 +1428,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 0,
     };
   }
+
+  // ! Разобраться с отображением цены без абика
 
   function findPriceItem(priceId) {
     const findedPriceItem = priceList.value.find((val) => {
@@ -1433,6 +1451,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     console.log(idxAndIdofPrice.value);
 
+    withoutSub.value = false;
+
     temporaryEdittingTimeOption.value = {
       ...findPriceItem(priceId).timeOptions[editOptionIdx],
     };
@@ -1450,7 +1470,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   function saveEdittingPrice(editOptionIdx, priceId, addTimeInPriceOptionMode) {
     const newPriceData = { ...temporaryEdittingTimeOption.value };
-    console.log(newPriceData);
 
     const calculateHowWillCostSub = Math.trunc(
       temporaryEdittingTimeOption.value.subSingleLessonCost *
@@ -1459,17 +1478,34 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     console.log(calculateHowWillCostSub);
 
-    if (addTimeInPriceOptionMode) {
+    if (addTimeInPriceOptionMode && !withoutSub.value) {
+      console.log(withoutSub.value, "Срабатывает 2");
+
       console.log(findPriceItem(priceId));
 
       findPriceItem(priceId).timeOptions.push({
         ...newPriceData,
         subCost: calculateHowWillCostSub,
+        withoutSub: false,
       });
 
       closeAddTimeInPriceOption();
 
-      console.log("Все абики", priceList.value);
+      console.log("Все абики 2", priceList.value);
+
+      return;
+    } else if (addTimeInPriceOptionMode && withoutSub.value) {
+      console.log(withoutSub.value, "Срабатывает 1");
+
+      findPriceItem(priceId).timeOptions.push({
+        ...newPriceData,
+        subCost: calculateHowWillCostSub,
+        withoutSub: true,
+      });
+
+      closeAddTimeInPriceOption();
+
+      console.log("Все абики 1", priceList.value);
 
       return;
     } else {
@@ -1477,6 +1513,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         ...newPriceData,
         subCost: calculateHowWillCostSub,
       };
+      withoutSub.value = false;
     }
 
     console.log("Работает");
@@ -1484,33 +1521,44 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     closeEditPrice();
   }
 
-  // ! Добавить время в категорию
+  // ! Добавить услугу в категорию
 
   const isAddTimeInPriceOption = ref(false);
 
   function openAddTimeInPriceOption(itemId) {
     isAddTimeInPriceOption.value = true;
     idxAndIdofPrice.value.id = itemId;
+    withoutSub.value = false;
   }
 
   function closeAddTimeInPriceOption() {
     isAddTimeInPriceOption.value = false;
+    withoutSub.value = false;
     resetTemporaryEdittingTimeOption();
   }
 
-  // isEdittingPrice.value = true;
+  // ! Удалить услугу из категории
 
-  // idxAndIdofPrice.value = {
-  //   idx: editOptionIdx,
-  //   id: priceId,
-  // };
+  function removeTimeFromPriceOption(editOptionIdx, priceId) {
+    console.log("Работает удаление");
 
-  // console.log(idxAndIdofPrice.value);
+    findPriceItem(priceId).timeOptions.splice(editOptionIdx, 1);
 
-  // temporaryEdittingTimeOption.value = {
-  //   ...findPriceItem(priceId).timeOptions[editOptionIdx],
-  // };
-  // console.log(temporaryEdittingTimeOption.value);
+    console.log("Удалил абик из", priceList.value);
+
+    closeEditPrice();
+  }
+
+  // ! Удаление категории
+
+  function deleteCategory(priceIdx) {
+    priceList.value.splice(priceIdx, 1);
+    console.log(`Удалена категория ${priceIdx}`);
+  }
+
+  // ! Добавление категории
+
+  const isAddingCategory = ref(false);
 
   return {
     employees,
@@ -1628,5 +1676,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     isAddTimeInPriceOption,
     openAddTimeInPriceOption,
     closeAddTimeInPriceOption,
+    withoutSub,
+    removeTimeFromPriceOption,
+    deleteCategory,
+    isAddingCategory,
   };
 });

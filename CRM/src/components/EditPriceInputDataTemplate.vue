@@ -1,7 +1,8 @@
 <script setup>
 import MyInputNumberTemplate from "./Ui/MyInputNumberTemplate.vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
-import { computed } from "vue";
+import { computed, onUpdated } from "vue";
+import MyInputTextTemplate from "./Ui/MyInputTextTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -18,6 +19,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 console.log(scheduleStore.temporaryEdittingTimeOption);
@@ -28,6 +33,16 @@ const isButtonDisabled = computed(() => {
     scheduleStore.temporaryEdittingTimeOption.singleCost != 0 &&
     scheduleStore.temporaryEdittingTimeOption.subSingleLessonCost != 0 &&
     scheduleStore.temporaryEdittingTimeOption.subCountOfLessons != 0
+  ) {
+    return false;
+  } else if (
+    scheduleStore.withoutSub &&
+    scheduleStore.temporaryEdittingTimeOption.singleCost != 0
+  ) {
+    return false;
+  } else if (
+    scheduleStore.temporaryEdittingTimeOption.withoutSub &&
+    scheduleStore.temporaryEdittingTimeOption.singleCost != 0
   ) {
     return false;
   } else {
@@ -44,12 +59,22 @@ console.log(scheduleStore.temporaryEdittingTimeOption);
 //     subCost: 0,
 //     subCountOfLessons: 0,
 //   });
+
+onUpdated(() => {
+  console.log(scheduleStore.withoutSub);
+});
 </script>
 
 <template>
   <div class="inputsCard">
+    <MyInputTextTemplate
+      label-of-input="Наименование услуги:"
+      name="nameOfService"
+      my-placeholder="Необязательное поле"
+      v-model="scheduleStore.temporaryEdittingTimeOption.name"
+    />
     <MyInputNumberTemplate
-      label-of-input="Время занятия:"
+      label-of-input="Время услуги:"
       name="timeOfLesson"
       v-model="scheduleStore.temporaryEdittingTimeOption.timeOfSub"
     />
@@ -59,17 +84,43 @@ console.log(scheduleStore.temporaryEdittingTimeOption);
       v-model="scheduleStore.temporaryEdittingTimeOption.singleCost"
     />
     <MyInputNumberTemplate
-      label-of-input="Разовая стоимость занятия в абонементе:"
+      v-if="
+        !scheduleStore.withoutSub &&
+        !scheduleStore.temporaryEdittingTimeOption.withoutSub
+      "
+      class="inputForm"
+      label-of-input="Разовая стоимость услуги в абонементе:"
       name="subCost"
       v-model="scheduleStore.temporaryEdittingTimeOption.subSingleLessonCost"
     />
     <MyInputNumberTemplate
-      label-of-input="Количество занятий в абонементе:"
+      v-if="
+        !scheduleStore.withoutSub &&
+        !scheduleStore.temporaryEdittingTimeOption.withoutSub
+      "
+      class="inputForm"
+      label-of-input="Количество услуг в абонементе:"
       name="countOfLessons"
       v-model="scheduleStore.temporaryEdittingTimeOption.subCountOfLessons"
     />
-    <p>Стоимость абонемента посчитается автоматически</p>
+    <p
+      v-if="
+        !scheduleStore.withoutSub &&
+        !scheduleStore.temporaryEdittingTimeOption.withoutSub
+      "
+    >
+      Стоимость абонемента посчитается автоматически
+    </p>
+    <div v-if="addTimeInPriceOptionMode">
+      <input
+        type="checkbox"
+        id="withoutSub"
+        v-model="scheduleStore.withoutSub"
+      />
+      Без абонемента
+    </div>
     <my-button-template
+      :is-button-disabled="isButtonDisabled"
       @click="
         scheduleStore.saveEdittingPrice(
           props.editOptionIdx,
@@ -77,8 +128,18 @@ console.log(scheduleStore.temporaryEdittingTimeOption);
           props.addTimeInPriceOptionMode
         )
       "
-      :is-button-disabled="isButtonDisabled"
       >Сохранить</my-button-template
+    >
+    <my-button-template
+      v-if="!addTimeInPriceOptionMode"
+      :red="true"
+      @click="
+        scheduleStore.removeTimeFromPriceOption(
+          props.editOptionIdx,
+          props.priceId
+        )
+      "
+      >Удалить</my-button-template
     >
   </div>
 </template>

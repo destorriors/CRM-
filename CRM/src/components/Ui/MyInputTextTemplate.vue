@@ -10,6 +10,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  myPlaceholder: {
+    type: String,
+    default: "",
+  },
   modelValue: {
     type: [String, Number],
     default: "",
@@ -27,8 +31,8 @@ function changeInput(event) {
   <div>
     <label :for="props.name">{{ labelOfInput }}</label>
     <input
-      type="number"
-      min="0"
+      type="text"
+      :placeholder="props.myPlaceholder"
       :id="props.name"
       :value="props.modelValue"
       @input="changeInput"
