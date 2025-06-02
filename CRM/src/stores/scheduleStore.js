@@ -1244,20 +1244,20 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Создание абонемента
 
-  const subTime = ref([
-    {
-      id: 0,
-      name: "30 минут",
-    },
-    {
-      id: 1,
-      name: "45 минут",
-    },
-    {
-      id: 2,
-      name: "60 минут",
-    },
-  ]);
+  // const subTime = ref([
+  //   {
+  //     id: 0,
+  //     name: "30 минут",
+  //   },
+  //   {
+  //     id: 1,
+  //     name: "45 минут",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "60 минут",
+  //   },
+  // ]);
 
   const subsSelects = ref({
     subDirectionSelect: "",
@@ -1358,6 +1358,15 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           singleCost: 1700,
           subSingleLessonCost: 1500,
           subCost: 6700,
+          subCountOfLessons: 8,
+          withoutSub: false,
+        },
+        {
+          name: "",
+          timeOfSub: 45,
+          singleCost: 1500,
+          subSingleLessonCost: 1300,
+          subCost: 12300,
           subCountOfLessons: 4,
           withoutSub: false,
         },
@@ -1379,6 +1388,15 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         {
           name: "",
           timeOfSub: 45,
+          singleCost: 1700,
+          subSingleLessonCost: 1500,
+          subCost: 6700,
+          subCountOfLessons: 4,
+          withoutSub: false,
+        },
+        {
+          name: "",
+          timeOfSub: 60,
           singleCost: 1700,
           subSingleLessonCost: 1500,
           subCost: 6700,
@@ -1533,6 +1551,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   function closeAddTimeInPriceOption() {
     isAddTimeInPriceOption.value = false;
+
     withoutSub.value = false;
     resetTemporaryEdittingTimeOption();
   }
@@ -1558,7 +1577,123 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Добавление категории
 
-  const isAddingCategory = ref(false);
+  const isAddingPriceCategory = ref(false);
+
+  const priceCategoryInput = ref("");
+
+  function resetAddCategoryPrice() {
+    priceCategoryInput.value = "";
+    isAddingPriceCategory.value = false;
+  }
+
+  function openAddPriceCategory() {
+    isAddingPriceCategory.value = true;
+  }
+
+  function closeAddPriceCategory() {
+    resetAddCategoryPrice();
+  }
+
+  function saveAddPriceCategory() {
+    const newCategory = {
+      id: priceList.value.length + 1,
+      category: priceCategoryInput.value,
+      timeOptions: [],
+    };
+
+    priceList.value.push(newCategory);
+
+    resetAddCategoryPrice();
+
+    console.log("Добавлена категория", priceList.value);
+  }
+
+  // ! Поднятие и опускание цены на категорию
+
+  const raiseOrLowerPriceCategory = ref(0);
+  const inputForRaiseOrLowerPriceCategory = ref(0);
+
+  function resetRaiseOrLowerPriceCategory() {
+    raiseOrLowerPriceCategory.value = 0;
+    inputForRaiseOrLowerPriceCategory.value = 0;
+  }
+
+  function openRaiseOrLowerPriceCategory(serviceNumber, priceId) {
+    raiseOrLowerPriceCategory.value = Number(serviceNumber);
+    idxAndIdofPrice.value.id = priceId;
+  }
+
+  function closeRaiseOrLowerPriceCategory() {
+    resetRaiseOrLowerPriceCategory();
+  }
+
+  function saveResetRaiseOrLowerPriceCategory(editOptionIdx, priceId) {
+    if (raiseOrLowerPriceCategory.value === 1) {
+      findPriceItem(priceId).timeOptions.forEach((val) => {
+        val.singleCost = Math.trunc(
+          Number(val.singleCost) +
+            Number(inputForRaiseOrLowerPriceCategory.value)
+        );
+
+        if (!val.withoutSub) {
+          val.subSingleLessonCost = Math.trunc(
+            Number(val.subSingleLessonCost) +
+              Number(inputForRaiseOrLowerPriceCategory.value)
+          );
+          val.subCost = Math.trunc(
+            Number(val.subSingleLessonCost) * Number(val.subCountOfLessons)
+          );
+        }
+
+        console.log("Повысил цену");
+      });
+    } else if (raiseOrLowerPriceCategory.value === 2) {
+      findPriceItem(priceId).timeOptions.forEach((val) => {
+        val.singleCost = Math.trunc(
+          Number(val.singleCost) -
+            Number(inputForRaiseOrLowerPriceCategory.value)
+        );
+
+        if (!val.withoutSub) {
+          val.subSingleLessonCost = Math.trunc(
+            Number(val.subSingleLessonCost) -
+              Number(inputForRaiseOrLowerPriceCategory.value)
+          );
+          val.subCost = Math.trunc(
+            Number(val.subSingleLessonCost) * Number(val.subCountOfLessons)
+          );
+        }
+        console.log("Снизил цену");
+      });
+    }
+
+    closeRaiseOrLowerPriceCategory();
+  }
+
+  // {
+  //   id: 1,
+  //   category: "Логопед-дефектолог",
+  //   timeOptions: [
+  //     {
+  //       name: "",
+  //       timeOfSub: 30,
+  //       singleCost: 1500,
+  //       subSingleLessonCost: 1300,
+  //       subCost: 7600,
+  //       subCountOfLessons: 4,
+  //       withoutSub: false,
+  //     },
+  //     {
+  //       name: "",
+  //       timeOfSub: 45,
+  //       singleCost: 1700,
+  //       subSingleLessonCost: 1500,
+  //       subCost: 6700,
+  //       subCountOfLessons: 4,
+  //       withoutSub: false,
+  //     },
+  //   ],
+  // },
 
   return {
     employees,
@@ -1657,7 +1792,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     addLessonForSub,
     removeLessonForSub,
-    subTime,
+    // subTime,
     subsSelects,
     newSubIsOpen,
     openSubModal,
@@ -1679,6 +1814,15 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     withoutSub,
     removeTimeFromPriceOption,
     deleteCategory,
-    isAddingCategory,
+    isAddingPriceCategory,
+    openAddPriceCategory,
+    priceCategoryInput,
+    saveAddPriceCategory,
+    closeAddPriceCategory,
+    raiseOrLowerPriceCategory,
+    inputForRaiseOrLowerPriceCategory,
+    openRaiseOrLowerPriceCategory,
+    closeRaiseOrLowerPriceCategory,
+    saveResetRaiseOrLowerPriceCategory,
   };
 });

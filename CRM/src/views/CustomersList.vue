@@ -1,10 +1,11 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
 import { computed, onUpdated, ref } from "vue";
-import CustomersCard from "./CustomersCard.vue";
+import CustomersCard from "@/components/CustomersCard.vue";
 import { useRoute } from "vue-router";
-import ModalTemplate from "./Ui/ModalTemplate.vue";
-import AddNewCustomerComponent from "./AddNewCustomerComponent.vue";
+import ModalTemplate from "@/components/Ui/ModalTemplate.vue";
+import AddNewCustomerComponent from "@/components/AddNewCustomerComponent.vue";
+import SearchComponent from "@/components/SearchComponent.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -29,7 +30,16 @@ const route = useRoute();
 
 <template>
   <div v-if="route.path === '/customers'">
-    <div class="find-customer-input">
+    <SearchComponent
+      input-name="findCustomer"
+      input-placeholder="Укажите имя родителя или ребенка"
+      v-model="findCustomerInput"
+    >
+      <button class="add" @click="scheduleStore.openAddModelWindow">
+        Добавить клиента
+      </button>
+    </SearchComponent>
+    <!-- <div class="find-customer-input">
       <label for="findCustomer">Поиск...</label>
       <input
         type="text"
@@ -40,7 +50,7 @@ const route = useRoute();
       <button class="add" @click="scheduleStore.openAddModelWindow">
         Добавить клиента
       </button>
-    </div>
+    </div> -->
     <div
       class="container-card"
       v-for="customer in sortedCustomers"

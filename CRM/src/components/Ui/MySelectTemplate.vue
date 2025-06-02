@@ -14,8 +14,12 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  modelValue: {
+  arrayKey: {
     type: String,
+    required: true,
+  },
+  modelValue: {
+    type: [String, Number],
     required: true,
   },
 });
@@ -26,6 +30,12 @@ function changeModel(event) {
   emit("update:modelValue", event.target.value);
 }
 </script>
+
+<!-- <select v-for="item in scheduleStore.priceList">
+  <option value="item" v-for="option in item.timeOptions">
+    {{ option.timeOfSub }}
+  </option>
+</select> -->
 
 <template>
   <div>
@@ -39,9 +49,9 @@ function changeModel(event) {
       <option
         v-for="(array, idx) in props.arrayForOption"
         :key="`${array.id}-${idx + 1}`"
-        :value="array.name"
+        :value="array[props.arrayKey]"
       >
-        {{ array.name }}
+        {{ array[props.arrayKey] }}
       </option>
     </select>
   </div>
