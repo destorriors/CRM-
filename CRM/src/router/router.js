@@ -6,6 +6,7 @@ import EmployeeSchedule from "@/views/EmployeeSchedule.vue";
 import CustomersList from "@/views/CustomersList.vue";
 import CustomerPage from "@/views/CustomerPage.vue";
 import Price from "@/views/Price.vue";
+import AccountingPage from "@/views/AccountingPage.vue";
 
 const routes = [
   {
@@ -47,6 +48,10 @@ const routes = [
   {
     path: "/price",
     component: Price,
+  },
+  {
+    path: "/accounting",
+    component: AccountingPage,
   },
 ];
 

@@ -8,6 +8,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 0,
       name: "Кручинин Никита",
       speciality: ["Нейропсихолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -25,6 +27,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 1,
       name: "Желонкин Никита",
       speciality: ["Нейропсихолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -42,6 +46,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 2,
       name: "Бындина Елизавета",
       speciality: ["Нейропсихолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -59,6 +65,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 3,
       name: "Тришина Ирина",
       speciality: ["Нейропсихолог", "Логопед-дефектолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -77,6 +85,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 4,
       name: "Милова Людмила",
       speciality: ["Логопед-дефектолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -94,6 +104,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 5,
       name: "Ещенко Валентина",
       speciality: ["Нейропсихолог", "Психолог"],
+      rate: 50,
+      salary: 15000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -220,7 +232,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         // },
       ],
       description: "Some description",
-      specialistsId: [1, 2, 3, 4],
+      specialistsId: [0, 1, 2, 3, 4],
       queueToEmployee: [1, 5],
       phoneNumber: "89099399999",
 
@@ -1670,30 +1682,10 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     closeRaiseOrLowerPriceCategory();
   }
 
-  // {
-  //   id: 1,
-  //   category: "Логопед-дефектолог",
-  //   timeOptions: [
-  //     {
-  //       name: "",
-  //       timeOfSub: 30,
-  //       singleCost: 1500,
-  //       subSingleLessonCost: 1300,
-  //       subCost: 7600,
-  //       subCountOfLessons: 4,
-  //       withoutSub: false,
-  //     },
-  //     {
-  //       name: "",
-  //       timeOfSub: 45,
-  //       singleCost: 1700,
-  //       subSingleLessonCost: 1500,
-  //       subCost: 6700,
-  //       subCountOfLessons: 4,
-  //       withoutSub: false,
-  //     },
-  //   ],
-  // },
+  const accounting = ref({
+    profit: 1300,
+    loss: 0,
+  });
 
   return {
     employees,
@@ -1824,5 +1816,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     openRaiseOrLowerPriceCategory,
     closeRaiseOrLowerPriceCategory,
     saveResetRaiseOrLowerPriceCategory,
+
+    // ! Бухгалтерия
+
+    accounting,
   };
 });

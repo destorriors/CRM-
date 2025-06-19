@@ -16,12 +16,12 @@
     <router-link to="/price" class="card">
       <p>Цены</p>
     </router-link>
-    <router-link to="false" class="card">
+    <router-link to="/accounting" class="card">
       <p>Зарплата</p>
     </router-link>
-    <router-link to="false" class="card">
+    <!-- <router-link to="false" class="card">
       <p>Бухгалтерия</p>
-    </router-link>
+    </router-link> -->
   </div>
 </template>
 
