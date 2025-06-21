@@ -1,6 +1,7 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
 import MySelectTemplate from "./Ui/MySelectTemplate.vue";
+import MySelectWithoutKeysTemplate from "./Ui/MySelectWithoutKeysTemplate.vue";
 import MyButtonTemplate from "./Ui/MyButtonTemplate.vue";
 import { computed, watchEffect } from "vue";
 
@@ -122,8 +123,30 @@ const subQuantityByUniqueTime = computed(() => {
   }));
 });
 
+// const findPrice = computed(() => {
+//   const findedArray = scheduleStore.priceList.find((val) => {
+//     const findedArray =
+//       val.category === scheduleStore.subsSelects.subDirectionSelect;
+
+//     if (findedArray) {
+//       const currentPrice = findedArray.timeOptions.find((val) => {
+//         return val.timeOfSub === +scheduleStore.subsSelects.subTimeSelect;
+//       });
+//       return currentPrice;
+//     } else {
+//       return null;
+//     }
+//   });
+
+//   return findedArray;
+// });
+
 watchEffect(() => {
   console.log(subQuantityByUniqueTime.value);
+  console.log(uniqueTimeOptions.value);
+  console.log(scheduleStore.calculatedPrice);
+  console.log(scheduleStore.subsSelects.subTimeSelect);
+  console.log(scheduleStore.subsSelects.subQuantity);
 });
 </script>
 
@@ -154,6 +177,32 @@ watchEffect(() => {
       v-model="scheduleStore.subsSelects.subQuantity"
     />
 
+    <MySelectWithoutKeysTemplate
+      v-if="
+        scheduleStore.subsSelects.subDirectionSelect &&
+        scheduleStore.subsSelects.subTimeSelect &&
+        scheduleStore.subsSelects.subQuantity
+      "
+      label="Способ оплаты: "
+      name="paymentType"
+      :array-for-option="scheduleStore.paymentType"
+      v-model="scheduleStore.paymentTypeInput"
+    />
+    <div
+      class="price"
+      v-if="
+        scheduleStore.subsSelects.subDirectionSelect &&
+        scheduleStore.subsSelects.subTimeSelect &&
+        scheduleStore.subsSelects.subQuantity
+      "
+    >
+      <h3>Цена: {{ scheduleStore.calculatedPrice }} р.</h3>
+      <p>
+        После создания абонемента стоимость автоматически добавится к доходам
+        центра
+      </p>
+    </div>
+
     <!-- <label for="subQuontity">Количество занятий в абонеменете: </label>
     <input
       type="number"
@@ -180,6 +229,13 @@ watchEffect(() => {
 }
 .btn2 {
   align-self: center;
+}
+.price {
+  align-self: center;
+}
+p {
+  text-align: center;
+  color: rgb(170, 168, 168);
 }
 </style>
 

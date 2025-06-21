@@ -1,5 +1,6 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
+import MyInputNumberTemplate from "./Ui/MyInputNumberTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -125,6 +126,13 @@ const scheduleStore = useScheduleStore();
             </div>
           </div>
         </div>
+
+        <MyInputNumberTemplate
+          label-of-input="Ставка в процентах: "
+          name="employeeRate"
+          v-model.number="scheduleStore.temporaryData.rate"
+        />
+
         <div>
           <label for="education">Образование:</label>
           <input type="text" v-model="scheduleStore.temporaryData.education" />

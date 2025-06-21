@@ -50,6 +50,9 @@ const router = useRouter();
       </p>
     </div>
     <div>
+      <p><strong>Ставка:</strong> {{ `${employee.rate} %` || "Не указано" }}</p>
+    </div>
+    <div>
       <p>
         <strong>Опыт работы:</strong> {{ employee.experience || "Не указано" }}
       </p>

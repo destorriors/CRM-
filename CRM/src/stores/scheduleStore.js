@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 
 export const useScheduleStore = defineStore("scheduleStore", () => {
   // Сотрудники
@@ -28,7 +28,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       name: "Желонкин Никита",
       speciality: ["Нейропсихолог"],
       rate: 50,
-      salary: 15000,
+      salary: 10000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -46,8 +46,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 2,
       name: "Бындина Елизавета",
       speciality: ["Нейропсихолог"],
-      rate: 50,
-      salary: 15000,
+      rate: 15,
+      salary: 7000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -65,8 +65,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 3,
       name: "Тришина Ирина",
       speciality: ["Нейропсихолог", "Логопед-дефектолог"],
-      rate: 50,
-      salary: 15000,
+      rate: 20,
+      salary: 5000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -85,8 +85,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 4,
       name: "Милова Людмила",
       speciality: ["Логопед-дефектолог"],
-      rate: 50,
-      salary: 15000,
+      rate: 40,
+      salary: 7000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -104,8 +104,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 5,
       name: "Ещенко Валентина",
       speciality: ["Нейропсихолог", "Психолог"],
-      rate: 50,
-      salary: 15000,
+      rate: 30,
+      salary: 8000,
       workSchedule: [
         { day: "Понедельник", hours: ["09:00", "14:00"] },
         { day: "Вторник", hours: ["10:00", "18:00"] },
@@ -911,6 +911,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     employees.value[index].experience = edittingEmployee.value.experience;
     employees.value[index].workSchedule = updatedWorkSchedule;
     employees.value[index].speciality = edittingEmployee.value.speciality;
+    employees.value[index].rate = edittingEmployee.value.rate;
 
     edittingEmployee.value = {};
     isEdittingEmployee.value = false;
@@ -968,6 +969,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     education: "",
     experience: "",
     img: "",
+    rate: "",
+    salary: "",
   });
 
   function openAddEmployee() {
@@ -975,8 +978,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     mode.value = "add";
   }
 
-  function closeAddEmployee() {
-    isAddEmployeeModalVisible.value = false;
+  function resetTemporaryDataForEmployee() {
     temporaryData.value = {
       name: "",
       speciality: [],
@@ -992,7 +994,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       education: "",
       experience: "",
       img: "",
+      rate: "",
+      salary: "",
     };
+  }
+
+  function closeAddEmployee() {
+    isAddEmployeeModalVisible.value = false;
+    resetTemporaryDataForEmployee();
     mode.value = null;
   }
 
@@ -1014,6 +1023,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       education: temporaryData.value.education,
       experience: temporaryData.value.experience,
       img: temporaryData.value.img,
+      rate: temporaryData.value.rate,
+      salary: 0,
     };
 
     console.log(newEmployee);
@@ -1021,22 +1032,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     employees.value.push(newEmployee);
 
-    temporaryData.value = {
-      name: "",
-      speciality: [],
-      workSchedule: [
-        { day: "Понедельник", hours: ["00:00", "00:00"] },
-        { day: "Вторник", hours: ["00:00", "00:00"] },
-        { day: "Среда", hours: ["00:00", "00:00"] },
-        { day: "Четверг", hours: ["00:00", "00:00"] },
-        { day: "Пятница", hours: ["00:00", "00:00"] },
-        { day: "Суббота", hours: ["00:00", "00:00"] },
-        { day: "Воскресенье", hours: ["00:00", "00:00"] },
-      ],
-      education: "",
-      experience: "",
-      img: "",
-    };
+    resetTemporaryDataForEmployee();
     mode.value = null;
   }
 
@@ -1295,6 +1291,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   function closeSubModal() {
     newSubIsOpen.value = false;
+    paymentTypeInput.value = "";
     resetSubsSelects();
   }
 
@@ -1322,9 +1319,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     //   return
     // }
 
-    // ! Остановился на валидации, нужно сделать не так колхозно как выше, а в одну строчку
-    // ! Так же кнопку нужно заблокировать при недостатке инпутов
-
     if (
       !subsSelects.value.subDirectionSelect ||
       !subsSelects.value.subTimeSelect ||
@@ -1341,7 +1335,19 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     customer.subscription.push(newSub);
 
-    console.log(customer);
+    console.log("Добавлялка", customer);
+
+    // ! Данные accounting снизу, внимание!
+
+    accounting.value.profit.push({
+      id: accounting.value.profit.length + 1,
+      name: `Клиент ${customer.parentName} приобрел абонемент: ${newSub.typeOfSubs}, ${newSub.timeSub} мин., ${newSub.howMuchSubLeft} з. `,
+      sum: calculatedPrice.value,
+      date: "18:01:2025",
+      paymentType: paymentTypeInput.value,
+    });
+
+    console.log(accounting.value);
 
     resetSubsSelects();
 
@@ -1501,6 +1507,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
   function saveEdittingPrice(editOptionIdx, priceId, addTimeInPriceOptionMode) {
     const newPriceData = { ...temporaryEdittingTimeOption.value };
 
+    console.log("ВРЕМЯНКА", temporaryEdittingTimeOption.value);
+
     const calculateHowWillCostSub = Math.trunc(
       temporaryEdittingTimeOption.value.subSingleLessonCost *
         temporaryEdittingTimeOption.value.subCountOfLessons
@@ -1546,7 +1554,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       withoutSub.value = false;
     }
 
-    console.log("Работает");
+    console.log("Работает", priceList.value);
 
     closeEditPrice();
   }
@@ -1657,7 +1665,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           );
         }
 
-        console.log("Повысил цену");
+        console.log("Повысил цену", priceList.value);
       });
     } else if (raiseOrLowerPriceCategory.value === 2) {
       findPriceItem(priceId).timeOptions.forEach((val) => {
@@ -1682,10 +1690,167 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     closeRaiseOrLowerPriceCategory();
   }
 
+  // ! Бухгалтерия
+
+  const now = new Date();
+  const date = Intl.DateTimeFormat("ru-RU").format(now);
+
   const accounting = ref({
-    profit: 1300,
-    loss: 0,
+    totalProfit: 0,
+    totalLoss: 0,
+    loss: [
+      {
+        id: 1,
+        name: "На еду всем",
+        sum: 500,
+        date: date,
+        paymentType: "Карта",
+      },
+      {
+        id: 2,
+        name: "Какая-то хуита",
+        sum: 3434,
+        date: "17.03.2022",
+        paymentType: "Карта",
+      },
+    ],
+    profit: [
+      {
+        id: 1,
+        name: "Бабки на дороге",
+        sum: 62,
+        date: date,
+        paymentType: "Карта",
+      },
+      {
+        id: 2,
+        name: "Какая-то хуита 2",
+        sum: 102,
+        date: "17.03.2022",
+        paymentType: "Карта",
+      },
+    ],
   });
+
+  const paymentType = ref(["Карта", "СБП", "Наличные", "Перевод"]);
+
+  const paymentTypeInput = ref("");
+
+  // ! Подсчет общего дохода и расхода
+
+  const calculateTotalProfit = computed(() => {
+    const sum = accounting.value.profit.reduce((acc, val) => {
+      return acc + val.sum;
+    }, 0);
+
+    return sum;
+  });
+
+  const calculateTotalLoss = computed(() => {
+    const sum = accounting.value.loss.reduce((acc, val) => {
+      return acc + val.sum;
+    }, 0);
+
+    return sum;
+  });
+
+  watchEffect(() => {
+    accounting.value.totalProfit = calculateTotalProfit.value;
+    accounting.value.totalLoss = calculateTotalLoss.value;
+  });
+
+  // ! Добавление расхода
+
+  const isLossOrProfitModalWindowShwon = ref(false);
+  const lossOrProfitInput = ref("");
+  const sumLossOrPrifitInput = ref(0);
+  const lossOrProfitMode = ref(0);
+
+  function resetLossOrProfitInputs() {
+    lossOrProfitInput.value = "";
+    sumLossOrPrifitInput.value = 0;
+  }
+
+  function openLossOrProfitModalWindow(mode) {
+    isLossOrProfitModalWindowShwon.value = true;
+    lossOrProfitMode.value = mode;
+    console.log(mode);
+  }
+
+  function closeLossOrProfitModalWindow() {
+    isLossOrProfitModalWindowShwon.value = false;
+    lossOrProfitMode.value = 0;
+    paymentTypeInput.value = "";
+    resetLossOrProfitInputs();
+  }
+
+  // ! Сделать уникальный id для всех, но это скорее всего делается уже в БД
+  // ! Подумать что делать, если на замене будет
+
+  function addLossOrProfit() {
+    if (lossOrProfitMode.value === 1) {
+      const newLossValue = {
+        id: accounting.value.loss.length + 1,
+        name: lossOrProfitInput.value,
+        sum: +sumLossOrPrifitInput.value,
+        date: date,
+        paymentType: paymentTypeInput.value,
+      };
+
+      accounting.value.loss.push(newLossValue);
+      accounting.value.totalLoss =
+        accounting.value.totalLoss + +sumLossOrPrifitInput.value;
+    } else if (lossOrProfitMode.value === 2) {
+      const newProfitValue = {
+        id: accounting.value.profit.length + 1,
+        name: lossOrProfitInput.value,
+        sum: +sumLossOrPrifitInput.value,
+        date: date,
+        paymentType: paymentTypeInput.value,
+      };
+
+      accounting.value.profit.push(newProfitValue);
+      accounting.value.totalProfit =
+        accounting.value.totalProfit + +sumLossOrPrifitInput.value;
+    } else {
+      console.log("Ошибка");
+    }
+
+    console.log(lossOrProfitMode.value);
+
+    closeLossOrProfitModalWindow();
+  }
+
+  // ! Поиск цены за услугу для добавления в доходы
+
+  const calculatedPrice = computed(() => {
+    const category = priceList.value.find((val) => {
+      return val.category === subsSelects.value.subDirectionSelect;
+    });
+
+    if (
+      !category ||
+      !subsSelects.value.subTimeSelect ||
+      !subsSelects.value.subQuantity
+    ) {
+      return null;
+    }
+
+    const timeOption = category.timeOptions.find((opt) => {
+      return (
+        opt.timeOfSub.toString() === subsSelects.value.subTimeSelect &&
+        opt.subCountOfLessons === +subsSelects.value.subQuantity
+      );
+    });
+
+    console.log(timeOption);
+
+    return timeOption ? timeOption.subCost : null;
+  });
+
+  // ! Добавление ставки сотрудникам
+
+  // const employeRateInput = ref("");
 
   return {
     employees,
@@ -1797,6 +1962,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     isEdittingPrice,
     openEditPrice,
     closeEditPrice,
+    calculatedPrice,
     temporaryEdittingTimeOption,
     saveEdittingPrice,
     idxAndIdofPrice,
@@ -1820,5 +1986,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     // ! Бухгалтерия
 
     accounting,
+    paymentType,
+    isLossOrProfitModalWindowShwon,
+    openLossOrProfitModalWindow,
+    closeLossOrProfitModalWindow,
+    lossOrProfitInput,
+    sumLossOrPrifitInput,
+    addLossOrProfit,
+    lossOrProfitMode,
+    paymentTypeInput,
+
+    // ! Добавление ставки сотрудникам
+
+    // employeRateInput,
   };
 });

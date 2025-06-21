@@ -76,12 +76,12 @@ onUpdated(() => {
     <MyInputNumberTemplate
       label-of-input="Время услуги:"
       name="timeOfLesson"
-      v-model="scheduleStore.temporaryEdittingTimeOption.timeOfSub"
+      v-model.number="scheduleStore.temporaryEdittingTimeOption.timeOfSub"
     />
     <MyInputNumberTemplate
       label-of-input="Разовая стоимость:"
       name="singleCost"
-      v-model="scheduleStore.temporaryEdittingTimeOption.singleCost"
+      v-model.number="scheduleStore.temporaryEdittingTimeOption.singleCost"
     />
     <MyInputNumberTemplate
       v-if="
@@ -91,7 +91,9 @@ onUpdated(() => {
       class="inputForm"
       label-of-input="Разовая стоимость услуги в абонементе:"
       name="subCost"
-      v-model="scheduleStore.temporaryEdittingTimeOption.subSingleLessonCost"
+      v-model.number="
+        scheduleStore.temporaryEdittingTimeOption.subSingleLessonCost
+      "
     />
     <MyInputNumberTemplate
       v-if="
@@ -101,7 +103,9 @@ onUpdated(() => {
       class="inputForm"
       label-of-input="Количество услуг в абонементе:"
       name="countOfLessons"
-      v-model="scheduleStore.temporaryEdittingTimeOption.subCountOfLessons"
+      v-model.number="
+        scheduleStore.temporaryEdittingTimeOption.subCountOfLessons
+      "
     />
     <p
       v-if="

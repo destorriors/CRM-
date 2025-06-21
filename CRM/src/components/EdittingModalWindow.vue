@@ -1,5 +1,6 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
+import MyInputNumberTemplate from "./Ui/MyInputNumberTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -146,6 +147,13 @@ function closeModal() {
               </div>
             </div>
           </div>
+
+          <MyInputNumberTemplate
+            label-of-input="Ставка в процентах: "
+            name="employeeRate"
+            v-model.number="scheduleStore.edittingEmployee.rate"
+          />
+
           <div>
             <label for="employeeEducation">Образование: </label>
             <input

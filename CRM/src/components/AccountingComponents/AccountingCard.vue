@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed } from "vue";
+import { defineProps } from "vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
 
 const props = defineProps({
@@ -35,7 +35,10 @@ function countOfCustomers(employeeId) {
         {{ countOfCustomers(employee.id).length || 0 }}</span
       >
       <span></span>
-      <span>Доход для центра: </span>
+      <span
+        >Доход для центра (НАДО ПОДУМОТЬ):
+        {{ employee.salary - +(employee.salary * `0.${employee.rate}`) }}</span
+      >
     </div>
     <!-- ! Доход центра будет высчитыватся из цены абонемента/разового занятия умноженный на процент ставки  -->
     <!-- ! Добавить ставку сотруднику -->
