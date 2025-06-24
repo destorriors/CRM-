@@ -1,16 +1,22 @@
 <script setup>
-import { ref } from "vue";
+import { useScheduleStore } from "@/stores/scheduleStore";
+import { computed, watchEffect } from "vue";
 
-const test = ref([1, 2, 3, 4, 5, 6, 7]);
+const scheduleStore = useScheduleStore();
 
-const employee = [
-  "Яремина",
-  "Желонкин",
-  "Кручинин",
-  "Петухова",
-  "Иванов",
-  "Петров",
-];
+const date = new Date();
+const dayOfWeek = date.toLocaleDateString("ru-RU", { weekday: "long" });
+
+const employessFilteredForDaySchedule = computed(() => {
+  return scheduleStore.employees.filter((val) => {
+    return val.workSchedule.some((cur) => cur.day.toLowerCase() === dayOfWeek);
+  });
+});
+
+watchEffect(() => {
+  console.log(employessFilteredForDaySchedule.value);
+  console.log(dayOfWeek);
+});
 </script>
 
 <template>
@@ -21,15 +27,18 @@ const employee = [
     <thead>
       <tr>
         <th></th>
-        <th v-for="(emp, idx) in employee">
-          {{ emp }}
+        <th
+          v-for="(employee, idx) in employessFilteredForDaySchedule"
+          :key="employee.id"
+        >
+          {{ employee.name }}
         </th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(it, idx) in employee">
-        <th>{{ idx + 1 }}</th>
-        <td v-for="op in employee.length">Еще колонка</td>
+      <tr>
+        <th>Время</th>
+        <td>Колонка</td>
       </tr>
     </tbody>
   </table>
@@ -47,3 +56,12 @@ caption {
   text-align: center;
 }
 </style>
+
+<!-- ! Остановился на том нужно ли подключать дополнительную библеотеку date-fns для работы с датами, или использовать новые функции js из видео -->
+<!-- ! Так же необходимо заполнить таблицу и рассчитать время для каждой сетки -->
+<!-- ! Перенести в стор скрипт -->
+<!-- ! Реализовать промотку вправо или влево по дням расписания -->
+<!-- ! Так же добавить взаимодействие с именами, чтобы роутером перекидывался на специалиста или клиента -->
+<!-- ! Реализовать drag&drop -->
+<!-- ! Реализовать напоминалку справа -->
+<!-- ! Подумать как сделать напоминалку с календарем -->
