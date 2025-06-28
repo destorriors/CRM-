@@ -1852,6 +1852,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // const employeRateInput = ref("");
 
+  // ! Главная страница
+
+  const isModalWindowForScheduleTemplateVisible = ref(false);
+
+  function openModalWindowForScheduleTemplate() {
+    isModalWindowForScheduleTemplateVisible.value = true;
+  }
+
+  function closeModalWindowForScheduleTemplate() {
+    isModalWindowForScheduleTemplateVisible.value = false;
+  }
+
   return {
     employees,
     customers,
@@ -1999,5 +2011,11 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     // ! Добавление ставки сотрудникам
 
     // employeRateInput,
+
+    // ! Главная страница
+
+    isModalWindowForScheduleTemplateVisible,
+    openModalWindowForScheduleTemplate,
+    closeModalWindowForScheduleTemplate,
   };
 });
