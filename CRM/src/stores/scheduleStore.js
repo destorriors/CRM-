@@ -183,6 +183,12 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       phoneNumber: "89099399999",
       schedule: [
         {
+          day: "Вторник",
+          time: "09:00",
+          employeeId: 0,
+          description: "Что-то в дополнение 1",
+        },
+        {
           day: "Понедельник",
           time: "10:15",
           employeeId: 0,
@@ -1856,12 +1862,49 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   const isModalWindowForScheduleTemplateVisible = ref(false);
 
-  function openModalWindowForScheduleTemplate() {
+  const choosenCustomer = ref(null);
+
+  const selectedIdAndTimeForMain = ref({
+    id: 0,
+    time: "",
+  });
+
+  function resetAllDataForMain() {
+    choosenCustomer.value = null;
+    selectedIdAndTimeForMain.value = {
+      id: 0,
+      time: "",
+    };
+  }
+
+  function openModalWindowForScheduleTemplate(employeeId, time) {
     isModalWindowForScheduleTemplateVisible.value = true;
+    choosenCustomer.value = getCustomerForMainPage(employeeId, time);
+    selectedIdAndTimeForMain.value = {
+      id: employeeId,
+      time: time,
+    };
   }
 
   function closeModalWindowForScheduleTemplate() {
     isModalWindowForScheduleTemplateVisible.value = false;
+    resetAllDataForMain();
+  }
+
+  function getCustomerForMainPage(employeeId, time) {
+    const currentCustomer = customers.value.filter((val) => {
+      return val.schedule.some((cur) => {
+        return (
+          cur.employeeId === employeeId &&
+          cur.day.toLowerCase() === "вторник" &&
+          cur.time === time
+        );
+      });
+    });
+
+    //! Не забудь поменять день недели на динамический
+
+    return currentCustomer || false;
   }
 
   return {
@@ -2017,5 +2060,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     isModalWindowForScheduleTemplateVisible,
     openModalWindowForScheduleTemplate,
     closeModalWindowForScheduleTemplate,
+    getCustomerForMainPage,
+    choosenCustomer,
+    selectedIdAndTimeForMain,
   };
 });

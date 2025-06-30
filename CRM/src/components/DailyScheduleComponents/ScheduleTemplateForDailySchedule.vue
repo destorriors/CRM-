@@ -14,7 +14,7 @@ const employessFilteredForDaySchedule = computed(() => {
   });
 });
 
-function getCustomer(employeeId, time) {
+function getCustomerForMainPage(employeeId, time) {
   const currentCustomer = scheduleStore.customers.filter((val) => {
     return val.schedule.some((cur) => {
       return (
@@ -43,10 +43,6 @@ function getCustomer(employeeId, time) {
 
 function test(f, s) {
   console.log(`${f}-${s}`);
-}
-
-function click(f, s) {
-  console.log(`Кликнул сюда ${f}-${s}`);
 }
 
 watchEffect(() => {
@@ -85,10 +81,18 @@ watchEffect(() => {
           @mouseover="test(employee.id, time)"
         >
           <span
-            v-if="getCustomer(employee.id, time)"
-            v-for="cus in getCustomer(employee.id, time)"
+            v-if="scheduleStore.getCustomerForMainPage(employee.id, time)"
+            v-for="cus in scheduleStore.getCustomerForMainPage(
+              employee.id,
+              time
+            )"
             :key="cus.id"
-            @click="scheduleStore.openModalWindowForScheduleTemplate"
+            @click="
+              scheduleStore.openModalWindowForScheduleTemplate(
+                employee.id,
+                time
+              )
+            "
           >
             <span v-for="cusSchedule in cus.schedule">
               <span
@@ -107,6 +111,9 @@ watchEffect(() => {
       </tr>
       <ModalWindowForScheduleTemplate
         @close="scheduleStore.closeModalWindowForScheduleTemplate"
+        :customer="scheduleStore.choosenCustomer"
+        :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
+        :time="scheduleStore.selectedIdAndTimeForMain.time"
       />
     </tbody>
   </table>
