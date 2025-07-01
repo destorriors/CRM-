@@ -14,32 +14,32 @@ const employessFilteredForDaySchedule = computed(() => {
   });
 });
 
-function getCustomerForMainPage(employeeId, time) {
-  const currentCustomer = scheduleStore.customers.filter((val) => {
-    return val.schedule.some((cur) => {
-      return (
-        cur.employeeId === employeeId &&
-        cur.day.toLowerCase() === "вторник" &&
-        cur.time === time
-      );
-    });
-  });
+// function getCustomerForMainPage(employeeId, time) {
+//   const currentCustomer = scheduleStore.customers.filter((val) => {
+//     return val.schedule.some((cur) => {
+//       return (
+//         cur.employeeId === employeeId &&
+//         cur.day.toLowerCase() === "вторник" &&
+//         cur.time === time
+//       );
+//     });
+//   });
 
-  // console.log(currentCustomer);
+//   // console.log(currentCustomer);
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // Не забудь поменять день недели на динамический
+//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//   // Не забудь поменять день недели на динамический
 
-  // const currentTime = currentCustomer.filter((val) => {
-  //   return val.schedule.some((cur) => {
-  //     return cur.day.toLowerCase() === "понедельник" && cur.time === time;
-  //   });
-  // });
+//   // const currentTime = currentCustomer.filter((val) => {
+//   //   return val.schedule.some((cur) => {
+//   //     return cur.day.toLowerCase() === "понедельник" && cur.time === time;
+//   //   });
+//   // });
 
-  return currentCustomer || false;
-}
+//   return currentCustomer || false;
+// }
 
 function test(f, s) {
   console.log(`${f}-${s}`);
@@ -136,6 +136,10 @@ tbody {
   border: 1px solid black;
   padding: 10px;
 }
+/* td:hover {
+  transform: scale(1.5, 1.5);
+  box-shadow: 1px;
+} */
 caption {
   text-align: center;
 }

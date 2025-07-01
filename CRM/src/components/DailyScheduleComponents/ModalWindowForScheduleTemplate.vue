@@ -1,7 +1,8 @@
 <script setup>
-import { defineEmits, defineProps, watchEffect } from "vue";
+import { defineEmits, defineProps, watchEffect, computed } from "vue";
 import ModalTemplate from "../Ui/ModalTemplate.vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
+import MyButtonTemplate from "../Ui/MyButtonTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -26,8 +27,17 @@ function closeModal() {
   emit("close");
 }
 
+const filteredSubByEmployeeSpec = computed(() => {
+  const finded = scheduleStore.employees.find((emp) => {
+    return +emp.id === +props.employeeId;
+  });
+
+  return finded || null;
+});
+
 watchEffect(() => {
   console.log(props.customer);
+  console.log(filteredSubByEmployeeSpec.value);
 });
 </script>
 
@@ -53,6 +63,36 @@ watchEffect(() => {
           <span>
             {{ scheduleCus.description }}
           </span>
+          <div
+            v-for="(subscription, index) in customer.subscription"
+            :key="`${customer.id}-${index}-subscription`"
+          >
+            <span
+              v-if="
+                filteredSubByEmployeeSpec.speciality.includes(
+                  subscription.typeOfSubs
+                )
+              "
+            >
+              {{ subscription.typeOfSubs }}: {{ subscription.howMuchSubLeft }} -
+              {{ subscription.timeSub }}
+              <my-button-template
+                :red="true"
+                @click="
+                  scheduleStore.removeLessonForSub(
+                    customer.id,
+                    index,
+                    props.employeeId
+                  )
+                "
+                >Списать</my-button-template
+              >
+            </span>
+
+            <span v-else-if="customer.subscription.length === 0">
+              Нет абонемента!
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -66,6 +106,4 @@ span {
 }
 </style>
 
-<!-- ! Остановился на том, чтобы запихнуть необходимые данные при открытии модалки в функцию, чтобы не прокидывать эти данные через for -->
-<!-- ! Думал над тем что положить в модалку, там по-любому кнопки с финансами должны быть - снять абик и т.д. -->
 <!-- ! Так же что делать с другими пустыми ячейками, какую модалку туда запихнуть и какую инфу отображать, скорее всего быстрая запись кого-нибудь -->

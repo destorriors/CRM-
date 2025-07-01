@@ -158,24 +158,28 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       subscription: [
         {
           typeOfSubs: "Нейропсихолог",
-          timeSub: "45 минут",
-          howMuchSubLeft: 12,
-        },
-        {
-          typeOfSubs: "Логопед",
-          timeSub: "60 минут",
+          timeSub: 45,
           howMuchSubLeft: 8,
+          totalBoughtSubQuantity: 8,
         },
         {
-          typeOfSubs: "Психолог",
-          timeSub: "60 минут",
-          howMuchSubLeft: 3,
+          typeOfSubs: "Логопед-дефектолог",
+          timeSub: 60,
+          howMuchSubLeft: 4,
+          totalBoughtSubQuantity: 4,
         },
-        {
-          typeOfSubs: "Дефектолог",
-          timeSub: "60 минут",
-          howMuchSubLeft: 5,
-        },
+        // {
+        //   typeOfSubs: "Психолог",
+        //   timeSub: 60,
+        //   howMuchSubLeft: 3,
+        //   totalBoughtSubQuantity: 8,
+        // },
+        // {
+        //   typeOfSubs: "Дефектолог",
+        //   timeSub: 60,
+        //   howMuchSubLeft: 5,
+        //   totalBoughtSubQuantity: 8,
+        // },
       ],
       description: "Some description",
       specialistsId: [0, 5],
@@ -231,11 +235,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       parentName: "Марина",
       name: "Клиент 2",
       subscription: [
-        // {
-        //   typeOfSubs: ["Нейропсихолог"],
-        //   timeSub: ["45 минут"],
-        //   howMuchSubLeft: 12,
-        // },
+        {
+          typeOfSubs: "Нейропсихолог",
+          timeSub: 45,
+          howMuchSubLeft: 4,
+          totalBoughtSubQuantity: 4,
+        },
+        {
+          typeOfSubs: "Логопед-дефектолог",
+          timeSub: 30,
+          howMuchSubLeft: 4,
+          totalBoughtSubQuantity: 4,
+        },
       ],
       description: "Some description",
       specialistsId: [0, 1, 2, 3, 4],
@@ -324,8 +335,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       subscription: [
         {
           typeOfSubs: "Нейропсихолог",
-          timeSub: "45 минут",
-          howMuchSubLeft: 12,
+          timeSub: 45,
+          howMuchSubLeft: 8,
+          totalBoughtSubQuantity: 4,
         },
       ],
       description: "Some description",
@@ -333,7 +345,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       queueToEmployee: [0],
       phoneNumber: "89099399999",
 
-      schedule: [],
+      schedule: [
+        {
+          day: "Вторник",
+          time: "09:15",
+          employeeId: 0,
+          description: "Что-то в дополнение 2",
+        },
+      ],
     },
     {
       id: 4,
@@ -1234,13 +1253,59 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     const customer = customers.value.find((val) => {
       return val.id === customerId;
     });
-    return customer;
+    return customer || null;
   }
 
-  function removeLessonForSub(customerId, subscriptionIdx) {
-    // const customer = customers.value.find((val) => {
-    //   return val.id === customerId;
-    // });
+  function findEmployee(employeeId) {
+    const employee = employees.value.find((val) => {
+      return val.id === employeeId;
+    });
+    return employee || null;
+  }
+
+  function findPriceByCategory(category) {
+    const price = priceList.value.find((val) => {
+      return val.category === category;
+    });
+    return price || null;
+  }
+
+  // ! Добавление зарплаты сотруднику и снятие абонемента с главной страницы
+
+  function calculateSubLessonForEmployeeSalary(customer, subIdx, employeeId) {
+    const findedPrice = findPriceByCategory(
+      customer.subscription[subIdx].typeOfSubs
+    );
+
+    const findedTimeOptionsOfPrice = findedPrice.timeOptions.find(
+      (val) =>
+        val.timeOfSub === customer.subscription[subIdx].timeSub &&
+        val.subCountOfLessons ===
+          customer.subscription[subIdx].totalBoughtSubQuantity
+    );
+
+    const findedEmployee = findEmployee(employeeId);
+
+    const calculateSalaryForEmployeeByOneSubLesson =
+      findedTimeOptionsOfPrice.subSingleLessonCost * `0.${findedEmployee.rate}`;
+
+    findedEmployee.salary =
+      +findedEmployee.salary + +calculateSalaryForEmployeeByOneSubLesson;
+
+    // - Над вот этим надо подумать куда и как выводить что сотрудник заработал за занятие
+
+    console.log(calculateSalaryForEmployeeByOneSubLesson);
+
+    accounting.value.loss.push({
+      id: accounting.value.loss.length + 1,
+      name: `Сотрудник ${findedEmployee.name} провел занятие по абонементу с ${customer.name} `,
+      sum: +calculateSalaryForEmployeeByOneSubLesson,
+      date: "18:01:2025",
+      paymentType: "",
+    });
+  }
+
+  function removeLessonForSub(customerId, subscriptionIdx, employeeId) {
     const customer = findCustomer(customerId);
 
     const subIdx = subscriptionIdx;
@@ -1250,7 +1315,15 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     if (customer.subscription[subIdx].howMuchSubLeft <= limit) {
       customer.subscription.splice(subIdx, 1);
       return;
-    } else {
+    } else if (employeeId !== null && employeeId !== undefined) {
+      customer.subscription[subIdx].howMuchSubLeft =
+        customer.subscription[subIdx].howMuchSubLeft - 1;
+
+      calculateSubLessonForEmployeeSalary(customer, subIdx, employeeId);
+
+      console.log("Добавляем бабки сюда", findEmployee(employeeId));
+    } else if (!employeeId) {
+      console.log("Передал", employeeId);
       customer.subscription[subIdx].howMuchSubLeft =
         customer.subscription[subIdx].howMuchSubLeft - 1;
     }
@@ -1258,34 +1331,19 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Создание абонемента
 
-  // const subTime = ref([
-  //   {
-  //     id: 0,
-  //     name: "30 минут",
-  //   },
-  //   {
-  //     id: 1,
-  //     name: "45 минут",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "60 минут",
-  //   },
-  // ]);
-
   const subsSelects = ref({
     subDirectionSelect: "",
     subTimeSelect: "",
     subQuantity: 0,
+    totalBoughtSubQuantity: 0,
   });
-
-  // const temporarySubCustomer = ref(null)
 
   function resetSubsSelects() {
     subsSelects.value = {
       subDirectionSelect: "",
       subTimeSelect: "",
       subQuantity: 0,
+      totalBoughtSubQuantity: 0,
     };
   }
 
@@ -1300,19 +1358,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     paymentTypeInput.value = "";
     resetSubsSelects();
   }
-
-  // subscription: [
-  //   {
-  //     typeOfSubs: "Нейропсихолог",
-  //     timeSub: "45 минут",
-  //     howMuchSubLeft: 12,
-  //   },
-  //   {
-  //     typeOfSubs: "Логопед",
-  //     timeSub: "60 минут",
-  //     howMuchSubLeft: 8,
-  //   },
-  // ],
 
   function saveAddNewSubToCustomer(customerId) {
     const customer = findCustomer(customerId);
@@ -1335,8 +1380,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     const newSub = {
       typeOfSubs: subsSelects.value.subDirectionSelect,
-      timeSub: subsSelects.value.subTimeSelect,
-      howMuchSubLeft: subsSelects.value.subQuantity,
+      timeSub: +subsSelects.value.subTimeSelect,
+      howMuchSubLeft: +subsSelects.value.subQuantity,
+      totalBoughtSubQuantity: +subsSelects.value.subQuantity,
     };
 
     customer.subscription.push(newSub);
@@ -2065,3 +2111,5 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     selectedIdAndTimeForMain,
   };
 });
+
+// ! Обыграть ошибку при отсутсвии данных вообще
