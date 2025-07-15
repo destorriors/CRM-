@@ -109,17 +109,37 @@ watchEffect(() => {
           </span>
         </td>
       </tr>
-      <ModalWindowForScheduleTemplate
-        @close="scheduleStore.closeModalWindowForScheduleTemplate"
-        :customer="scheduleStore.choosenCustomer"
-        :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
-        :time="scheduleStore.selectedIdAndTimeForMain.time"
-      />
+
+      <!-- ! Разобраться с тэгом transition, он помогает в анимация при рендере компонента -->
+      <Transition name="fade">
+        <ModalWindowForScheduleTemplate
+          @close="scheduleStore.closeModalWindowForScheduleTemplate"
+          :customer="scheduleStore.choosenCustomer"
+          :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
+          :time="scheduleStore.selectedIdAndTimeForMain.time"
+        />
+      </Transition>
     </tbody>
   </table>
 </template>
 
+<!-- ! Стили для тега transition, который позволяет настроить анимации -->
 <style scoped>
+/* .fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+} */
+
 /* .main-table {
   position: relative;
   left: 3vw;

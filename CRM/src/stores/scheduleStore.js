@@ -333,12 +333,12 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       parentName: "Хи",
       name: "Третий тест",
       subscription: [
-        {
-          typeOfSubs: "Нейропсихолог",
-          timeSub: 45,
-          howMuchSubLeft: 8,
-          totalBoughtSubQuantity: 4,
-        },
+        // {
+        //   typeOfSubs: "Нейропсихолог",
+        //   timeSub: 45,
+        //   howMuchSubLeft: 8,
+        //   totalBoughtSubQuantity: 4,
+        // },
       ],
       description: "Some description",
       specialistsId: [],
@@ -1272,6 +1272,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Добавление зарплаты сотруднику и снятие абонемента с главной страницы
 
+  // - Сделать оплату разовую основываясь на функции ниже , остальное в модалке посмотри
+
   function calculateSubLessonForEmployeeSalary(customer, subIdx, employeeId) {
     const findedPrice = findPriceByCategory(
       customer.subscription[subIdx].typeOfSubs
@@ -1296,13 +1298,20 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     console.log(calculateSalaryForEmployeeByOneSubLesson);
 
-    accounting.value.loss.push({
-      id: accounting.value.loss.length + 1,
-      name: `Сотрудник ${findedEmployee.name} провел занятие по абонементу с ${customer.name} `,
-      sum: +calculateSalaryForEmployeeByOneSubLesson,
-      date: "18:01:2025",
-      paymentType: "",
-    });
+    // accounting.value.loss.push({
+    //   id: accounting.value.loss.length + 1,
+    //   name: `Сотрудник ${findedEmployee.name} провел занятие по абонементу с ${customer.name} `,
+    //   sum: +calculateSalaryForEmployeeByOneSubLesson,
+    //   date: "18:01:2025",
+    //   paymentType: "",
+    // });
+
+    const nameForLossToAccounting = `Сотрудник ${findedEmployee.name} провел занятие по абонементу с ${customer.name} `;
+
+    addLossToAccounting(
+      nameForLossToAccounting,
+      +calculateSalaryForEmployeeByOneSubLesson
+    );
   }
 
   function removeLessonForSub(customerId, subscriptionIdx, employeeId) {
@@ -1327,6 +1336,33 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       customer.subscription[subIdx].howMuchSubLeft =
         customer.subscription[subIdx].howMuchSubLeft - 1;
     }
+  }
+
+  // ! Добавление занятия сотруднику без абонемента
+
+  function calculateLessonWithoutSubForEmployeeSalary(employeeId) {
+    const findedEmployee = findEmployee(employeeId);
+
+    const findedPrice = findPriceByCategory("Нейропсихолог");
+
+    // const optionForPrice
+
+    // const calculateSalaryForEmployeeByOneSubLesson =
+    //   findedTimeOptionsOfPrice.subSingleLessonCost * `0.${findedEmployee.rate}`;
+
+    // findedEmployee.salary =
+    //   +findedEmployee.salary + +calculateSalaryForEmployeeByOneSubLesson;
+
+    // const nameForLossToAccounting = `Сотрудник ${findedEmployee.name} провел занятие без абонемента с ${customer.name} `;
+
+    // addLossToAccounting(
+    //   nameForLossToAccounting,
+    //   +calculateSalaryForEmployeeByOneSubLesson
+    // );
+
+    console.log(findedEmployee);
+
+    console.log(findedPrice);
   }
 
   // ! Создание абонемента
@@ -1391,13 +1427,22 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     // ! Данные accounting снизу, внимание!
 
-    accounting.value.profit.push({
-      id: accounting.value.profit.length + 1,
-      name: `Клиент ${customer.parentName} приобрел абонемент: ${newSub.typeOfSubs}, ${newSub.timeSub} мин., ${newSub.howMuchSubLeft} з. `,
-      sum: calculatedPrice.value,
-      date: "18:01:2025",
-      paymentType: paymentTypeInput.value,
-    });
+    // accounting.value.profit.push({
+    //   id: accounting.value.profit.length + 1,
+    //   name: `Клиент ${customer.parentName} приобрел абонемент: ${newSub.typeOfSubs}, ${newSub.timeSub} мин., ${newSub.howMuchSubLeft} з. `,
+    //   sum: calculatedPrice.value,
+    //   date: "18:01:2025",
+    //   paymentType: paymentTypeInput.value,
+    // });
+
+    const nameForAccounting = `Клиент ${customer.parentName} приобрел абонемент: ${newSub.typeOfSubs}, ${newSub.timeSub} мин., ${newSub.howMuchSubLeft} з. `;
+
+    addProfitToAccounting(
+      nameForAccounting,
+      +calculatedPrice.value,
+      "18:01:2025",
+      paymentTypeInput.value
+    );
 
     console.log(accounting.value);
 
@@ -1788,6 +1833,28 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   const paymentTypeInput = ref("");
 
+  // ! Функции добавления расхода/дохода
+
+  function addLossToAccounting(name, sum, date, paymentType) {
+    accounting.value.loss.push({
+      id: accounting.value.loss.length + 1,
+      name: name || "",
+      sum: sum || 0,
+      date: date,
+      paymentType: paymentType || "",
+    });
+  }
+
+  function addProfitToAccounting(name, sum, date, paymentType) {
+    accounting.value.profit.push({
+      id: accounting.value.profit.length + 1,
+      name: name || "",
+      sum: sum || 0,
+      date: date,
+      paymentType: paymentType || "",
+    });
+  }
+
   // ! Подсчет общего дохода и расхода
 
   const calculateTotalProfit = computed(() => {
@@ -1841,27 +1908,43 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   function addLossOrProfit() {
     if (lossOrProfitMode.value === 1) {
-      const newLossValue = {
-        id: accounting.value.loss.length + 1,
-        name: lossOrProfitInput.value,
-        sum: +sumLossOrPrifitInput.value,
-        date: date,
-        paymentType: paymentTypeInput.value,
-      };
+      // const newLossValue = {
+      //   id: accounting.value.loss.length + 1,
+      //   name: lossOrProfitInput.value,
+      //   sum: +sumLossOrPrifitInput.value,
+      //   date: date,
+      //   paymentType: paymentTypeInput.value,
+      // };
 
-      accounting.value.loss.push(newLossValue);
+      // accounting.value.loss.push(newLossValue);
+
+      addLossToAccounting(
+        lossOrProfitInput.value,
+        +sumLossOrPrifitInput.value,
+        date,
+        paymentTypeInput.value
+      );
+
       accounting.value.totalLoss =
         accounting.value.totalLoss + +sumLossOrPrifitInput.value;
     } else if (lossOrProfitMode.value === 2) {
-      const newProfitValue = {
-        id: accounting.value.profit.length + 1,
-        name: lossOrProfitInput.value,
-        sum: +sumLossOrPrifitInput.value,
-        date: date,
-        paymentType: paymentTypeInput.value,
-      };
+      // const newProfitValue = {
+      //   id: accounting.value.profit.length + 1,
+      //   name: lossOrProfitInput.value,
+      //   sum: +sumLossOrPrifitInput.value,
+      //   date: date,
+      //   paymentType: paymentTypeInput.value,
+      // };
 
-      accounting.value.profit.push(newProfitValue);
+      // accounting.value.profit.push(newProfitValue);
+
+      addProfitToAccounting(
+        lossOrProfitInput.value,
+        +sumLossOrPrifitInput.value,
+        date,
+        paymentTypeInput.value
+      );
+
       accounting.value.totalProfit =
         accounting.value.totalProfit + +sumLossOrPrifitInput.value;
     } else {
@@ -2109,6 +2192,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     getCustomerForMainPage,
     choosenCustomer,
     selectedIdAndTimeForMain,
+    calculateLessonWithoutSubForEmployeeSalary,
   };
 });
 

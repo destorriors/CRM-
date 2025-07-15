@@ -2,6 +2,7 @@
 import ModalTemplate from "../Ui/ModalTemplate.vue";
 import MyInputTextTemplate from "../Ui/MyInputTextTemplate.vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
+import MySelectTemplate from "../Ui/MySelectTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 </script>
@@ -17,11 +18,27 @@ const scheduleStore = useScheduleStore();
     title="Добавление категории"
     @close="scheduleStore.closeAddPriceCategory"
   >
-    <MyInputTextTemplate
+    <!-- ! Если чето ебанет, то я поменял инпут -->
+
+    <!-- <MyInputTextTemplate
       label-of-input="Укажите название:"
       name="categoryName"
       v-model="scheduleStore.priceCategoryInput"
+    /> -->
+
+    <MySelectTemplate
+      label="Выберите направление:"
+      name="categoryName"
+      v-model="scheduleStore.priceCategoryInput"
+      :array-for-option="scheduleStore.specialization"
+      array-key="name"
     />
+
+    <p>
+      Если вы не видите подходящее направление, добавьте нужное во вкладке
+      "Специалисты"
+    </p>
+
     <my-button-template
       class="btn2"
       @click="scheduleStore.saveAddPriceCategory"
@@ -32,6 +49,10 @@ const scheduleStore = useScheduleStore();
 </template>
 
 <style scoped>
+p {
+  text-align: center;
+  color: rgb(170, 168, 168);
+}
 .add-category {
   display: block; /* Убеждаемся, что кнопка — блочный элемент */
   margin-left: auto;
