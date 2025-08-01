@@ -1,5 +1,5 @@
 <script setup>
-import { defineEmits, defineProps, watchEffect } from "vue";
+import { defineEmits, defineProps, watchEffect, ref } from "vue";
 import ModalTemplate from "../Ui/ModalTemplate.vue";
 import { useScheduleStore } from "@/stores/scheduleStore";
 import PaymentForScheduleModal from "./PaymentForScheduleModal.vue";
@@ -43,20 +43,33 @@ watchEffect(() => {
   console.log(props.customer);
   // console.log(filteredSubByEmployeeSpec.value);
 });
+
+const currentDate = ref("15.07.2025");
 </script>
 
 <template>
+  <!-- ! Дату выше поменять -->
   <modal-template
     :is-visible="scheduleStore.isModalWindowForScheduleTemplateVisible"
     @close="closeModal"
   >
     <InfoForScheduleModal
+      v-if="!scheduleStore.isCustomerCameToLesson"
       :customer="scheduleStore.choosenCustomer"
       :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
       :time="scheduleStore.selectedIdAndTimeForMain.time"
+      :current-date="currentDate"
     />
 
-    <PaymentForScheduleModal />
+    <Transition name="fade">
+      <PaymentForScheduleModal
+        v-if="scheduleStore.isCustomerCameToLesson"
+        :customer="scheduleStore.choosenCustomer"
+        :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
+        :current-date="currentDate"
+        :time="scheduleStore.selectedIdAndTimeForMain.time"
+      />
+    </Transition>
 
     <!-- <div v-for="customer in props.customer" :key="customer.id">
       <div
@@ -120,14 +133,9 @@ watchEffect(() => {
       </div>
     </div> -->
 
+    <!-- ! Сделать функционал для отслеживания пришел/не пришел, чтобы ячейка не открывалась больше или открывалась, но с элементом оплачено или не оплачено -->
     <!-- ! Остановился тут для того, чтобы работал пересчет зп сотруднику на пришел-не пришел, необходимо сначал сделать функционал добавления клиента в таблицу -->
-    <!-- ! Необходимо добавить функционал в уже существующий при добавлении клиентов, тоесть необходимо добавить поле время занятия -->
-    <!-- ! Все-таки решил сделать вручную оплату по времени, так как один клиент без абика может ходить к разным спецам с разным временем, поэтому нужно сделать вручную -->
-    <!-- ! Крч, задействуй отдельно созданный компонент под это все -->
-    <!-- ! Необходимо сделать функционал оплаты без абика разового занятия основываясь на ценах -->
-    <!-- ! Дополнительно сделал универсальные функции добавления дохода/расхода -->
     <!-- ! Так же необходимо вместо этой кнопки, если есть абик, то списывать абик -->
-    <!-- ! Вот тут еще не делал функционал, только кнопку для вида -->
     <!-- ! Необходимо прописать функцию и динамические стили, чтобы при нажатии, во первых всплывало окно списать или не списывать абонемент, а во вторых закрасить ячейку в таблице -->
     <!-- ! Для этого необходимо сделать общую переменную состояния -->
   </modal-template>
@@ -142,6 +150,20 @@ watchEffect(() => {
 span {
   display: block;
   margin-top: 15px;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>
 

@@ -155,6 +155,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 1,
       parentName: "Ольга",
       name: "Клиент 1",
+      history: [
+        {
+          presents: false,
+          payed: false,
+          time: "09:00",
+          date: "15.07.2025",
+        },
+      ],
       subscription: [
         {
           typeOfSubs: "Нейропсихолог",
@@ -252,7 +260,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       specialistsId: [0, 1, 2, 3, 4],
       queueToEmployee: [1, 5],
       phoneNumber: "89099399999",
-
+      history: [
+        {
+          presents: true,
+          payed: false,
+          time: "09:00",
+          date: "15.07.2025",
+        },
+      ],
       schedule: [
         {
           day: "Вторник",
@@ -344,7 +359,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       specialistsId: [],
       queueToEmployee: [0],
       phoneNumber: "89099399999",
-
+      history: [
+        {
+          presents: true,
+          payed: false,
+          time: "09:00",
+          date: "15.07.2025",
+        },
+      ],
       schedule: [
         {
           day: "Вторник",
@@ -369,7 +391,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       specialistsId: [],
       queueToEmployee: [0, 5],
       phoneNumber: "89099399999",
-
+      history: [
+        {
+          presents: true,
+          payed: false,
+          time: "09:00",
+          date: "15.07.2025",
+        },
+      ],
       schedule: [],
     },
   ]);
@@ -1338,33 +1367,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     }
   }
 
-  // ! Добавление занятия сотруднику без абонемента
-
-  function calculateLessonWithoutSubForEmployeeSalary(employeeId) {
-    const findedEmployee = findEmployee(employeeId);
-
-    const findedPrice = findPriceByCategory("Нейропсихолог");
-
-    // const optionForPrice
-
-    // const calculateSalaryForEmployeeByOneSubLesson =
-    //   findedTimeOptionsOfPrice.subSingleLessonCost * `0.${findedEmployee.rate}`;
-
-    // findedEmployee.salary =
-    //   +findedEmployee.salary + +calculateSalaryForEmployeeByOneSubLesson;
-
-    // const nameForLossToAccounting = `Сотрудник ${findedEmployee.name} провел занятие без абонемента с ${customer.name} `;
-
-    // addLossToAccounting(
-    //   nameForLossToAccounting,
-    //   +calculateSalaryForEmployeeByOneSubLesson
-    // );
-
-    console.log(findedEmployee);
-
-    console.log(findedPrice);
-  }
-
   // ! Создание абонемента
 
   const subsSelects = ref({
@@ -1459,7 +1461,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       category: "Нейропсихолог",
       timeOptions: [
         {
-          name: "",
+          name: "30 мин",
           timeOfSub: 30,
           singleCost: 1500,
           subSingleLessonCost: 1300,
@@ -1468,7 +1470,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           withoutSub: false,
         },
         {
-          name: "",
+          name: "45 мин на 8",
           timeOfSub: 45,
           singleCost: 1700,
           subSingleLessonCost: 1500,
@@ -1477,7 +1479,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           withoutSub: false,
         },
         {
-          name: "",
+          name: "45 мин на 4",
           timeOfSub: 45,
           singleCost: 1500,
           subSingleLessonCost: 1300,
@@ -1492,7 +1494,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       category: "Логопед-дефектолог",
       timeOptions: [
         {
-          name: "",
+          name: "30 мин",
           timeOfSub: 30,
           singleCost: 1500,
           subSingleLessonCost: 1300,
@@ -1501,7 +1503,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           withoutSub: false,
         },
         {
-          name: "",
+          name: "45 мин",
           timeOfSub: 45,
           singleCost: 1700,
           subSingleLessonCost: 1500,
@@ -1510,7 +1512,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           withoutSub: false,
         },
         {
-          name: "",
+          name: "60 мин",
           timeOfSub: 60,
           singleCost: 1700,
           subSingleLessonCost: 1500,
@@ -1787,10 +1789,12 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     closeRaiseOrLowerPriceCategory();
   }
 
-  // ! Бухгалтерия
+  // ! Дата
 
   const now = new Date();
   const date = Intl.DateTimeFormat("ru-RU").format(now);
+
+  // ! Бухгалтерия
 
   const accounting = ref({
     totalProfit: 0,
@@ -2004,6 +2008,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: 0,
       time: "",
     };
+    isCustomerCameToLesson.value = false;
+    serviceMainNameValue.value = "";
+    // customerDidntCome.value = false;
   }
 
   function openModalWindowForScheduleTemplate(employeeId, time) {
@@ -2034,6 +2041,106 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     //! Не забудь поменять день недели на динамический
 
     return currentCustomer || false;
+  }
+
+  // ! Модальное окно состояния клиента на главной
+
+  const isCustomerCameToLesson = ref(false);
+
+  function cameCustomerSwitch() {
+    isCustomerCameToLesson.value = true;
+  }
+
+  // ! Добавление денег за занятия сотруднику без абонемента
+
+  function calculateLessonWithoutSubForEmployeeSalary(
+    employeeId,
+    customer,
+    cost,
+    date,
+    time
+  ) {
+    const findedEmployee = findEmployee(employeeId);
+
+    const calculateSalaryForEmployeeByOneWithoutSubLesson =
+      +cost * `0.${findedEmployee.rate}`;
+
+    const calculateProfit =
+      +cost - +calculateSalaryForEmployeeByOneWithoutSubLesson;
+
+    findedEmployee.salary =
+      +findedEmployee.salary + +calculateSalaryForEmployeeByOneWithoutSubLesson;
+
+    const nameForLossToAccounting = `Сотрудник ${findedEmployee.name} провел занятие без абонемента с ${customer[0].name} `;
+
+    addLossToAccounting(
+      nameForLossToAccounting,
+      +calculateSalaryForEmployeeByOneWithoutSubLesson
+    );
+
+    // - Поменять данные на динамические
+
+    addProfitToAccounting(
+      nameForLossToAccounting,
+      +calculateProfit,
+      "19.01.2025",
+      paymentTypeInput.value
+    );
+
+    console.log(customer);
+
+    pushToCustomerHistory(customer[0].id, true, true, time, date);
+
+    closeModalWindowForScheduleTemplate();
+  }
+
+  const serviceMainNameValue = ref("");
+
+  // const customerDidntCome = ref(false);
+
+  function pushToCustomerHistory(customerId, presents, payed, time, date) {
+    const findedCustomer = findCustomer(customerId);
+
+    const dataForHistoryOfCustomer = {
+      presents: presents,
+      payed: payed,
+      time: time,
+      date: date,
+    };
+
+    findedCustomer.history.push(dataForHistoryOfCustomer);
+  }
+
+  function didntCameCustomer(customerId, date, time) {
+    // customerDidntCome.value = true;
+
+    // const findedCustomer = findCustomer(customerId);
+
+    // const dataForHistoryOfCustomer = {
+    //   presents: false,
+    //   payed: false,
+    //   time: time,
+    //   date: date,
+    // };
+
+    // findedCustomer.history.push(dataForHistoryOfCustomer);
+
+    pushToCustomerHistory(customerId, false, false, time, date);
+
+    console.log(customerId, date, time);
+    console.log(
+      "Добавлена история сюда, что тип не пришел",
+      findCustomer(customerId)
+    );
+
+    // history: [
+    //   {
+    // presents: false,
+    // payed: false,
+    // time: "09:00",
+    // date: "15.07.2025",
+    //   },
+    // ],
   }
 
   return {
@@ -2193,6 +2300,11 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     choosenCustomer,
     selectedIdAndTimeForMain,
     calculateLessonWithoutSubForEmployeeSalary,
+    isCustomerCameToLesson,
+    cameCustomerSwitch,
+    serviceMainNameValue,
+    // customerDidntCome,
+    didntCameCustomer,
   };
 });
 

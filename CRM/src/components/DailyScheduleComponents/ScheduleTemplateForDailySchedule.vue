@@ -14,33 +14,6 @@ const employessFilteredForDaySchedule = computed(() => {
   });
 });
 
-// function getCustomerForMainPage(employeeId, time) {
-//   const currentCustomer = scheduleStore.customers.filter((val) => {
-//     return val.schedule.some((cur) => {
-//       return (
-//         cur.employeeId === employeeId &&
-//         cur.day.toLowerCase() === "вторник" &&
-//         cur.time === time
-//       );
-//     });
-//   });
-
-//   // console.log(currentCustomer);
-
-//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   // Не забудь поменять день недели на динамический
-
-//   // const currentTime = currentCustomer.filter((val) => {
-//   //   return val.schedule.some((cur) => {
-//   //     return cur.day.toLowerCase() === "понедельник" && cur.time === time;
-//   //   });
-//   // });
-
-//   return currentCustomer || false;
-// }
-
 function test(f, s) {
   console.log(`${f}-${s}`);
 }
@@ -58,7 +31,9 @@ watchEffect(() => {
 
 <template>
   <caption>
-    День недели
+    {{
+      dayOfWeek.toLocaleUpperCase()
+    }}
   </caption>
   <table class="main-table">
     <thead>
@@ -117,6 +92,7 @@ watchEffect(() => {
           :customer="scheduleStore.choosenCustomer"
           :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
           :time="scheduleStore.selectedIdAndTimeForMain.time"
+          title="Управление клиентом"
         />
       </Transition>
     </tbody>
@@ -161,7 +137,10 @@ tbody {
   box-shadow: 1px;
 } */
 caption {
+  display: block;
   text-align: center;
+  margin: 15px;
+  font-weight: 800;
 }
 </style>
 

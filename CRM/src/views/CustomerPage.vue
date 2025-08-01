@@ -109,6 +109,15 @@ const isForMainEditting = true;
       <h2>Нет абонемента !</h2>
     </div>
   </div>
+  <div class="history">
+    <h3>История</h3>
+    <div v-for="history in customer.history">
+      <span>
+        {{ `Клиент ${history.presents ? "пришел" : "не пришел"}` }}
+      </span>
+      <span> {{}} </span>
+    </div>
+  </div>
   <ModalWindow
     :is-visible="scheduleStore.isModalVisible"
     :customer="scheduleStore.selectedCustomer"

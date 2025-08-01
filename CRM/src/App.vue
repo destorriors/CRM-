@@ -1,5 +1,4 @@
 <script setup>
-import ScheduleTable from "./components/ScheduleTable.vue";
 import { useScheduleStore } from "./stores/scheduleStore.js";
 import NavBar from "./components/Ui/NavBar.vue";
 

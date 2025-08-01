@@ -32,17 +32,20 @@ const isButtonDisabled = computed(() => {
     scheduleStore.temporaryEdittingTimeOption.timeOfSub != 0 &&
     scheduleStore.temporaryEdittingTimeOption.singleCost != 0 &&
     scheduleStore.temporaryEdittingTimeOption.subSingleLessonCost != 0 &&
-    scheduleStore.temporaryEdittingTimeOption.subCountOfLessons != 0
+    scheduleStore.temporaryEdittingTimeOption.subCountOfLessons != 0 &&
+    scheduleStore.temporaryEdittingTimeOption.name != ""
   ) {
     return false;
   } else if (
     scheduleStore.withoutSub &&
-    scheduleStore.temporaryEdittingTimeOption.singleCost != 0
+    scheduleStore.temporaryEdittingTimeOption.singleCost != 0 &&
+    scheduleStore.temporaryEdittingTimeOption.name != ""
   ) {
     return false;
   } else if (
     scheduleStore.temporaryEdittingTimeOption.withoutSub &&
-    scheduleStore.temporaryEdittingTimeOption.singleCost != 0
+    scheduleStore.temporaryEdittingTimeOption.singleCost != 0 &&
+    scheduleStore.temporaryEdittingTimeOption.name != ""
   ) {
     return false;
   } else {
@@ -70,7 +73,6 @@ onUpdated(() => {
     <MyInputTextTemplate
       label-of-input="Наименование услуги:"
       name="nameOfService"
-      my-placeholder="Необязательное поле"
       v-model="scheduleStore.temporaryEdittingTimeOption.name"
     />
     <MyInputNumberTemplate
