@@ -1,12 +1,16 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
-import { computed, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import ModalWindowForScheduleTemplate from "./ModalWindowForScheduleTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
 const date = new Date();
-const dayOfWeek = date.toLocaleDateString("ru-RU", { weekday: "long" });
+// ! Динамический день недели
+// const dayOfWeek = date.toLocaleDateString("ru-RU", { weekday: "long" });
+
+// ! Это временная заглушка
+const dayOfWeek = "вторник";
 
 const employessFilteredForDaySchedule = computed(() => {
   return scheduleStore.employees.filter((val) => {
@@ -27,6 +31,60 @@ watchEffect(() => {
     })
   );
 });
+
+const draggedCustomer = ref(null);
+
+// Начало перетаскивания
+const onDragStart = (event, customer, employeeId, time) => {
+  draggedCustomer.value = { customer, employeeId, time };
+  event.dataTransfer.setData(
+    "text/plain",
+    JSON.stringify({ customerId: customer.id, employeeId, time })
+  );
+  event.dataTransfer.effectAllowed = "move";
+  console.log("Старт перетаскивания");
+};
+
+// Перетаскивание над ячейкой
+const onDragOver = (event) => {
+  event.preventDefault(); // Разрешаем drop
+};
+
+// Завершение перетаскивания (drop)
+const onDrop = (event, targetEmployeeId, targetTime) => {
+  event.preventDefault();
+  if (draggedCustomer.value) {
+    const { customer, employeeId, time } = draggedCustomer.value;
+    const customerIndex = scheduleStore.customers.findIndex(
+      (c) => c.id === customer.id
+    );
+
+    if (customerIndex !== -1) {
+      // Удаляем клиента из старого расписания
+      const oldScheduleIndex = scheduleStore.customers[
+        customerIndex
+      ].schedule.findIndex(
+        (s) => s.employeeId === employeeId && s.time === time
+      );
+      if (oldScheduleIndex !== -1) {
+        scheduleStore.customers[customerIndex].schedule.splice(
+          oldScheduleIndex,
+          1
+        );
+      }
+
+      // Добавляем клиента в новое расписание
+      scheduleStore.customers[customerIndex].schedule.push({
+        day: dayOfWeek,
+        time: targetTime,
+        employeeId: targetEmployeeId,
+        description: customer.schedule[0]?.description || "",
+      });
+
+      draggedCustomer.value = null; // Сбрасываем перетаскиваемый элемент
+    }
+  }
+};
 </script>
 
 <template>
@@ -51,9 +109,12 @@ watchEffect(() => {
       <tr v-for="(time, idx) in scheduleStore.timeOptions" :key="time[idx]">
         <th>{{ time }}</th>
         <td
+          draggable="false"
           v-for="(employee, idx) in employessFilteredForDaySchedule"
           :key="`${employee}-${time}`"
           @mouseover="test(employee.id, time)"
+          @dragover="onDragOver"
+          @drop="onDrop($event, employee.id, time)"
         >
           <span
             v-if="scheduleStore.getCustomerForMainPage(employee.id, time)"
@@ -62,6 +123,8 @@ watchEffect(() => {
               time
             )"
             :key="cus.id"
+            draggable="true"
+            @dragstart="onDragStart($event, cus, employee.id, time)"
             @click="
               scheduleStore.openModalWindowForScheduleTemplate(
                 employee.id,
@@ -148,6 +211,7 @@ caption {
 <!-- ! Перенести в стор скрипт -->
 <!-- ! Реализовать промотку вправо или влево по дням расписания -->
 <!-- ! Так же добавить взаимодействие с именами, чтобы роутером перекидывался на специалиста или клиента -->
-<!-- ! Реализовать drag&drop -->
 <!-- ! Реализовать напоминалку справа -->
 <!-- ! Подумать как сделать напоминалку с календарем -->
+
+<!-- - Реализовать drag&drop -->

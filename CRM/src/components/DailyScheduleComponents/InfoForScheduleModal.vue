@@ -87,6 +87,14 @@ watchEffect(() => {
 //       ],
 </script>
 
+<!-- subscription: [
+{
+  typeOfSubs: "Нейропсихолог",
+  timeSub: 45,
+  howMuchSubLeft: 4,
+  totalBoughtSubQuantity: 4,
+}, -->
+
 <template>
   <div v-for="customer in props.customer" :key="customer.id">
     <div
@@ -119,21 +127,24 @@ watchEffect(() => {
             {{ subscription.typeOfSubs }}: {{ subscription.howMuchSubLeft }} -
             {{ subscription.timeSub }}
             <my-button-template
+              v-if="
+                !findHistoryPresentForCurrentCustomer ||
+                (findHistoryPresentForCurrentCustomer &&
+                  !findHistoryPresentForCurrentCustomer.subLoss)
+              "
               :red="true"
               @click="
                 scheduleStore.removeLessonForSub(
                   customer.id,
                   index,
-                  props.employeeId
+                  props.employeeId,
+                  props.currentDate,
+                  props.time
                 )
               "
               >Списать</my-button-template
             >
           </span>
-
-          <!-- <span v-else-if="customer.subscription.length === 0">
-            Нет абонемента!
-          </span> -->
         </div>
         <div class="didnt-visit">
           <my-button-template
@@ -148,7 +159,8 @@ watchEffect(() => {
           <h3
             v-else-if="
               findHistoryPresentForCurrentCustomer &&
-              findHistoryPresentForCurrentCustomer.payed
+              findHistoryPresentForCurrentCustomer.payed &&
+              !findHistoryPresentForCurrentCustomer.subLoss
             "
           >
             Оплачено !
@@ -173,6 +185,15 @@ watchEffect(() => {
           >
             Клиент не пришёл !
           </h3>
+
+          <h3
+            v-if="
+              findHistoryPresentForCurrentCustomer &&
+              findHistoryPresentForCurrentCustomer.subLoss
+            "
+          >
+            Абонемент списан !
+          </h3>
         </div>
       </div>
     </div>
@@ -182,6 +203,7 @@ watchEffect(() => {
 <style scoped>
 .didnt-visit {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   margin-top: 15px;
 }

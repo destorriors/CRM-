@@ -161,6 +161,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           payed: false,
           time: "09:00",
           date: "15.07.2025",
+          subLoss: false,
         },
       ],
       subscription: [
@@ -266,6 +267,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           payed: false,
           time: "09:00",
           date: "15.07.2025",
+          subLoss: false,
         },
       ],
       schedule: [
@@ -365,6 +367,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           payed: false,
           time: "09:00",
           date: "15.07.2025",
+          subLoss: false,
         },
       ],
       schedule: [
@@ -397,6 +400,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           payed: false,
           time: "09:00",
           date: "15.07.2025",
+          subLoss: false,
         },
       ],
       schedule: [],
@@ -562,6 +566,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           ? [{ day: day, time: time, employeeId: employeeId }]
           : [],
       queueToEmployee: [],
+      history: [],
     };
     return newCustomer;
   }
@@ -1343,7 +1348,13 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     );
   }
 
-  function removeLessonForSub(customerId, subscriptionIdx, employeeId) {
+  function removeLessonForSub(
+    customerId,
+    subscriptionIdx,
+    employeeId,
+    date,
+    time
+  ) {
     const customer = findCustomer(customerId);
 
     const subIdx = subscriptionIdx;
@@ -1360,6 +1371,24 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       calculateSubLessonForEmployeeSalary(customer, subIdx, employeeId);
 
       console.log("Добавляем бабки сюда", findEmployee(employeeId));
+
+      if (customer.history.length === 0) {
+        pushToCustomerHistory(customer.id, true, true, time, date, true);
+      } else {
+        const history = customer.history.find((val) => {
+          return val.date === date && val.time === time;
+        });
+
+        console.log(history);
+
+        if (history && !history.presents) {
+          history.subLoss = true;
+        } else {
+          pushToCustomerHistory(customer.id, true, true, time, date, true);
+        }
+      }
+
+      console.log(customer);
     } else if (!employeeId) {
       console.log("Передал", employeeId);
       customer.subscription[subIdx].howMuchSubLeft =
@@ -2098,7 +2127,14 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // const customerDidntCome = ref(false);
 
-  function pushToCustomerHistory(customerId, presents, payed, time, date) {
+  function pushToCustomerHistory(
+    customerId,
+    presents,
+    payed,
+    time,
+    date,
+    subLoss = false
+  ) {
     const findedCustomer = findCustomer(customerId);
 
     const dataForHistoryOfCustomer = {
@@ -2106,6 +2142,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       payed: payed,
       time: time,
       date: date,
+      subLoss: subLoss,
     };
 
     findedCustomer.history.push(dataForHistoryOfCustomer);

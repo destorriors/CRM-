@@ -71,7 +71,10 @@ const isForMainEditting = true;
     </div>
     <div v-if="queueEmployee.length !== 0">
       <p><strong>В очереди: </strong></p>
-      <p v-for="(emp, idx) in queueEmployee" :key="emp.id">
+      <p
+        v-for="(emp, idx) in queueEmployee"
+        :key="`${emp.id}-${idx}-queueEmploye`"
+      >
         ({{ idx + 1 }}) {{ emp.name }}
       </p>
     </div>
@@ -109,15 +112,29 @@ const isForMainEditting = true;
       <h2>Нет абонемента !</h2>
     </div>
   </div>
+  <!-- - Вот тут подумать над оформлением -->
   <div class="history">
     <h3>История</h3>
-    <div v-for="history in customer.history">
+    <div
+      v-for="(history, index) in customer.history"
+      :key="`${customer}-${index}-history`"
+      v-if="customer.history.length != 0"
+    >
       <span>
         {{ `Клиент ${history.presents ? "пришел" : "не пришел"}` }}
       </span>
-      <span> {{}} </span>
+      <span v-if="!history.subLoss">{{
+        `Клиент ${history.payed ? "оплатил" : "не оплатил"}`
+      }}</span>
+      <span>{{ `${history.subLoss ? "Списан абонемент" : ""}` }}</span>
+      <span>Дата: {{ history.date }}</span>
+      <span>Время: {{ history.time }}</span>
+    </div>
+    <div class="absent-history" v-else>
+      <h2>История отсутствует</h2>
     </div>
   </div>
+
   <ModalWindow
     :is-visible="scheduleStore.isModalVisible"
     :customer="scheduleStore.selectedCustomer"
