@@ -7,6 +7,8 @@ import CustomersList from "@/views/CustomersList.vue";
 import CustomerPage from "@/views/CustomerPage.vue";
 import Price from "@/views/Price.vue";
 import AccountingPage from "@/views/AccountingPage.vue";
+import { useScheduleStore } from "@/stores/scheduleStore";
+import { ref } from "vue";
 
 const routes = [
   {
@@ -60,6 +62,21 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// - <!-- - Добавь дату для будущих или предстоящих событий в зарплате -->
+// - <!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
+// - <!-- - Удали эти коменты, чтобы они не засирали собой функцию -->
+
+router.afterEach((to, from) => {
+  if (from.path === "/") {
+    const scheduleStore = useScheduleStore();
+
+    scheduleStore.currentDayChange();
+
+    console.log("Пользователь ушел с главной страницы");
+    // Дополнительные действия
+  }
 });
 
 // router.beforeEach((to, from, next) => {

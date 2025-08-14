@@ -1,98 +1,60 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
-import { computed, ref, watchEffect } from "vue";
+import { computed, watchEffect } from "vue";
 import ModalWindowForScheduleTemplate from "./ModalWindowForScheduleTemplate.vue";
+import { isToday } from "date-fns";
 
 const scheduleStore = useScheduleStore();
 
-const date = new Date();
-// ! Динамический день недели
-// const dayOfWeek = date.toLocaleDateString("ru-RU", { weekday: "long" });
-
-// ! Это временная заглушка
-const dayOfWeek = "вторник";
-
 const employessFilteredForDaySchedule = computed(() => {
   return scheduleStore.employees.filter((val) => {
-    return val.workSchedule.some((cur) => cur.day.toLowerCase() === dayOfWeek);
+    return val.workSchedule.some(
+      (cur) => cur.day.toLowerCase() === scheduleStore.dayOfWeek
+    );
   });
 });
 
-function test(f, s) {
-  console.log(`${f}-${s}`);
-}
+// function test(f, s) {
+//   console.log(`${f}-${s}`);
+// }
 
 watchEffect(() => {
   console.log(employessFilteredForDaySchedule.value);
-  console.log(dayOfWeek);
+  console.log(scheduleStore.dayOfWeek);
   console.log(
     scheduleStore.customers[0].schedule.find((val) => {
       return val.day === "Понедельник";
     })
   );
+
+  console.log(isToday(scheduleStore.now));
+  console.log(scheduleStore.date);
 });
-
-const draggedCustomer = ref(null);
-
-// Начало перетаскивания
-const onDragStart = (event, customer, employeeId, time) => {
-  draggedCustomer.value = { customer, employeeId, time };
-  event.dataTransfer.setData(
-    "text/plain",
-    JSON.stringify({ customerId: customer.id, employeeId, time })
-  );
-  event.dataTransfer.effectAllowed = "move";
-  console.log("Старт перетаскивания");
-};
-
-// Перетаскивание над ячейкой
-const onDragOver = (event) => {
-  event.preventDefault(); // Разрешаем drop
-};
-
-// Завершение перетаскивания (drop)
-const onDrop = (event, targetEmployeeId, targetTime) => {
-  event.preventDefault();
-  if (draggedCustomer.value) {
-    const { customer, employeeId, time } = draggedCustomer.value;
-    const customerIndex = scheduleStore.customers.findIndex(
-      (c) => c.id === customer.id
-    );
-
-    if (customerIndex !== -1) {
-      // Удаляем клиента из старого расписания
-      const oldScheduleIndex = scheduleStore.customers[
-        customerIndex
-      ].schedule.findIndex(
-        (s) => s.employeeId === employeeId && s.time === time
-      );
-      if (oldScheduleIndex !== -1) {
-        scheduleStore.customers[customerIndex].schedule.splice(
-          oldScheduleIndex,
-          1
-        );
-      }
-
-      // Добавляем клиента в новое расписание
-      scheduleStore.customers[customerIndex].schedule.push({
-        day: dayOfWeek,
-        time: targetTime,
-        employeeId: targetEmployeeId,
-        description: customer.schedule[0]?.description || "",
-      });
-
-      draggedCustomer.value = null; // Сбрасываем перетаскиваемый элемент
-    }
-  }
-};
 </script>
 
 <template>
-  <caption>
-    {{
-      dayOfWeek.toLocaleUpperCase()
-    }}
-  </caption>
+  <div class="cap">
+    <my-button-template
+      v-if="!isToday(scheduleStore.now)"
+      @click="scheduleStore.currentDayChange()"
+      >Вернутся</my-button-template
+    >
+    <my-button-template @click="scheduleStore.previousDayChange()"
+      >Назад</my-button-template
+    >
+    <caption>
+      {{
+        scheduleStore.dayOfWeek.toLocaleUpperCase()
+      }}
+      ({{
+        scheduleStore.date
+      }})
+    </caption>
+    <my-button-template @click="scheduleStore.nextDayChange()"
+      >Вперед</my-button-template
+    >
+  </div>
+
   <table class="main-table">
     <thead>
       <tr>
@@ -112,9 +74,8 @@ const onDrop = (event, targetEmployeeId, targetTime) => {
           draggable="false"
           v-for="(employee, idx) in employessFilteredForDaySchedule"
           :key="`${employee}-${time}`"
-          @mouseover="test(employee.id, time)"
-          @dragover="onDragOver"
-          @drop="onDrop($event, employee.id, time)"
+          @dragover="scheduleStore.onDragOver"
+          @drop="scheduleStore.onDrop($event, employee.id, time)"
         >
           <span
             v-if="scheduleStore.getCustomerForMainPage(employee.id, time)"
@@ -124,7 +85,9 @@ const onDrop = (event, targetEmployeeId, targetTime) => {
             )"
             :key="cus.id"
             draggable="true"
-            @dragstart="onDragStart($event, cus, employee.id, time)"
+            @dragstart="
+              scheduleStore.onDragStart($event, cus, employee.id, time)
+            "
             @click="
               scheduleStore.openModalWindowForScheduleTemplate(
                 employee.id,
@@ -164,6 +127,11 @@ const onDrop = (event, targetEmployeeId, targetTime) => {
 
 <!-- ! Стили для тега transition, который позволяет настроить анимации -->
 <style scoped>
+.cap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 /* .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -207,11 +175,24 @@ caption {
 }
 </style>
 
-<!-- ! Так же необходимо заполнить таблицу и рассчитать время для каждой сетки -->
-<!-- ! Перенести в стор скрипт -->
-<!-- ! Реализовать промотку вправо или влево по дням расписания -->
+<!-- - Найди все date и сделай динамическими -->
+<!-- - Так же сделай так, чтобы после того, как покидалась страница расписания дата менялась -->
+<!-- - Добавь дату для будущих или предстоящих событий в зарплате -->
+<!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
+<!-- - Удали эти коменты, чтобы они не засирали собой функцию -->
+
+<!-- - ГЛАВНАЯ ЗАДАЧА -->
+<!-- - НЕОБХОДИМО РЕАЛИЗОВАТЬ ВРЕМЯ, ДЛЯ ТОГО, ЧТОБЫ МОЖНО БЫЛО ОТДЕЛИТЬ ДАННЫЕ ДВУХ ТАБЛИЦ ДРУГ ОТ ДРУГА -->
+<!-- - СЕЙЧАС КАКАЯ ПРОБЛЕМА, КЛИЕНТЫ ЗАПИСАННЫЕ ЧЕРЕЗ ОСНОВНУЮ ТАБЛИЦУ НЕ ИМЕЮТ ДАТЫ, ТОЛЬКО ДЕНЬ НЕДЕЛИ -->
+<!-- - ЭТО ЗНАЧИТ, ЧТО НЕОБХОДИМО СДЕЛАТЬ УНИКАЛЬНЫЙ ДЕНЬ, В КОТОРОМ МОЖНО ДЕЛАТЬ ПРАВКИ, А УНИКАЛЬНОСТЬ ПРИДАСТ ТОЧНАЯ ДАТА -->
+<!-- - ИДЕЯ КАКАЯ - КЛИЕНТЫ ЗАПИСАННЫЕ У СПЕЦОВ ДОЛЖНЫ ОТОБРАЖАТСЯ ПО УМОЛЧАНИЮ НЕЗАВИСИМО ОТ ДАТЫ, НО ИЗМЕНЕНИЯ ДОЛЖНЫ ЗАВИСЕТЬ ИСКЛЮЧИТЕЛЬНО ОТ ДАТЫ -->
+
 <!-- ! Так же добавить взаимодействие с именами, чтобы роутером перекидывался на специалиста или клиента -->
 <!-- ! Реализовать напоминалку справа -->
 <!-- ! Подумать как сделать напоминалку с календарем -->
 
-<!-- - Реализовать drag&drop -->
+<!-- - Остановился на том, чтобы реализовать промотку вперед и назад по расписанию -->
+<!-- - Для этого нужно прописать дату в сторе, на ее основе сделать динамику и с помощью библиотеки fs реализовать даты -->
+<!-- - Необходимо переделать drag & drop, так чтобы при перемещении создавалась копия в расписании, и при этом основное расписание не затрагивалось -->
+<!-- - Для этого, скорее всего понадобится сделать копию всего расписания или чет подшаманить -->
+<!-- - Так же нужно реализовать перемотку с правильной последовательностью -->

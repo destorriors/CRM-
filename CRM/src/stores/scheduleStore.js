@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed, watchEffect } from "vue";
+import { addDays, format, subDays } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export const useScheduleStore = defineStore("scheduleStore", () => {
   // Сотрудники
@@ -277,24 +279,24 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           employeeId: 0,
           description: "Что-то в дополнение 1",
         },
-        {
-          day: "Вторник",
-          time: "10:15",
-          employeeId: 2,
-          description: "Что-то в дополнение 2",
-        },
-        {
-          day: "Вторник",
-          time: "10:15",
-          employeeId: 3,
-          description: "Что-то в дополнение 3",
-        },
-        {
-          day: "Вторник",
-          time: "10:15",
-          employeeId: 4,
-          description: "Что-то в дополнение 4",
-        },
+        // {
+        //   day: "Вторник",
+        //   time: "10:15",
+        //   employeeId: 2,
+        //   description: "Что-то в дополнение 2",
+        // },
+        // {
+        //   day: "Вторник",
+        //   time: "10:15",
+        //   employeeId: 3,
+        //   description: "Что-то в дополнение 3",
+        // },
+        // {
+        //   day: "Вторник",
+        //   time: "10:15",
+        //   employeeId: 4,
+        //   description: "Что-то в дополнение 4",
+        // },
         {
           day: "Среда",
           time: "15:15",
@@ -319,30 +321,30 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           employeeId: 4,
           description: "Что-то в дополнение 8",
         },
-        {
-          day: "Вторник",
-          time: "08:15",
-          employeeId: 1,
-          description: "Что-то в дополнение 9",
-        },
-        {
-          day: "Вторник",
-          time: "10:00",
-          employeeId: 2,
-          description: "Что-то в дополнение 10",
-        },
-        {
-          day: "Вторник",
-          time: "08:15",
-          employeeId: 3,
-          description: "Что-то в дополнение 11",
-        },
-        {
-          day: "Вторник",
-          time: "08:15",
-          employeeId: 4,
-          description: "Что-то в дополнение 12",
-        },
+        // {
+        //   day: "Вторник",
+        //   time: "08:15",
+        //   employeeId: 1,
+        //   description: "Что-то в дополнение 9",
+        // },
+        // {
+        //   day: "Вторник",
+        //   time: "10:00",
+        //   employeeId: 2,
+        //   description: "Что-то в дополнение 10",
+        // },
+        // {
+        //   day: "Вторник",
+        //   time: "08:15",
+        //   employeeId: 3,
+        //   description: "Что-то в дополнение 11",
+        // },
+        // {
+        //   day: "Вторник",
+        //   time: "08:15",
+        //   employeeId: 4,
+        //   description: "Что-то в дополнение 12",
+        // },
       ],
     },
     {
@@ -373,7 +375,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       schedule: [
         {
           day: "Вторник",
-          time: "09:15",
+          time: "12:00",
           employeeId: 0,
           description: "Что-то в дополнение 2",
         },
@@ -1471,7 +1473,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     addProfitToAccounting(
       nameForAccounting,
       +calculatedPrice.value,
-      "18:01:2025",
+      date.value,
       paymentTypeInput.value
     );
 
@@ -1820,8 +1822,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // ! Дата
 
-  const now = new Date();
-  const date = Intl.DateTimeFormat("ru-RU").format(now);
+  const now = ref(new Date());
+
+  // const date = ref(Intl.DateTimeFormat("ru-RU").format(now.value));
+
+  const date = ref(format(now.value, "dd.MM.yyyy"));
+
+  const dayOfWeek = ref(
+    now.value.toLocaleDateString("ru-RU", { weekday: "long" })
+  );
+
+  console.log(date.value);
+  console.log(dayOfWeek.value);
 
   // ! Бухгалтерия
 
@@ -1833,7 +1845,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         id: 1,
         name: "На еду всем",
         sum: 500,
-        date: date,
+        date: date.value,
         paymentType: "Карта",
       },
       {
@@ -1849,7 +1861,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         id: 1,
         name: "Бабки на дороге",
         sum: 62,
-        date: date,
+        date: date.value,
         paymentType: "Карта",
       },
       {
@@ -1954,7 +1966,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       addLossToAccounting(
         lossOrProfitInput.value,
         +sumLossOrPrifitInput.value,
-        date,
+        date.value,
         paymentTypeInput.value
       );
 
@@ -1974,7 +1986,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       addProfitToAccounting(
         lossOrProfitInput.value,
         +sumLossOrPrifitInput.value,
-        date,
+        date.value,
         paymentTypeInput.value
       );
 
@@ -2061,7 +2073,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       return val.schedule.some((cur) => {
         return (
           cur.employeeId === employeeId &&
-          cur.day.toLowerCase() === "вторник" &&
+          cur.day.toLowerCase() === dayOfWeek.value.toLowerCase() &&
           cur.time === time
         );
       });
@@ -2112,7 +2124,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     addProfitToAccounting(
       nameForLossToAccounting,
       +calculateProfit,
-      "19.01.2025",
+      date.value,
       paymentTypeInput.value
     );
 
@@ -2162,9 +2174,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     // findedCustomer.history.push(dataForHistoryOfCustomer);
 
-    pushToCustomerHistory(customerId, false, false, time, date);
+    pushToCustomerHistory(customerId, false, false, time, date.value);
 
-    console.log(customerId, date, time);
+    console.log(customerId, date.value, time);
     console.log(
       "Добавлена история сюда, что тип не пришел",
       findCustomer(customerId)
@@ -2178,6 +2190,113 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     // date: "15.07.2025",
     //   },
     // ],
+  }
+
+  // ! drag & drop
+
+  const draggedCustomer = ref(null);
+
+  const onDrop = (event, targetEmployeeId, targetTime) => {
+    event.preventDefault();
+    if (draggedCustomer.value) {
+      const { customer, employeeId, time } = draggedCustomer.value;
+      const customerIndex = customers.value.findIndex(
+        (c) => c.id === customer.id
+      );
+
+      if (customerIndex !== -1) {
+        // Удаляем клиента из старого расписания в локальной копии
+        const oldScheduleIndex = customers.value[
+          customerIndex
+        ].schedule.findIndex(
+          (s) => s.employeeId === employeeId && s.time === time
+        );
+        if (oldScheduleIndex !== -1) {
+          customers.value[customerIndex].schedule.splice(oldScheduleIndex, 1);
+        }
+
+        // Добавляем клиента в новое расписание в локальной копии
+        customers.value[customerIndex].schedule.push({
+          day: dayOfWeek.value,
+          time: targetTime,
+          employeeId: targetEmployeeId,
+          description: customer.schedule[0]?.description || "",
+        });
+
+        draggedCustomer.value = null; // Сбрасываем перетаскиваемый элемент
+      }
+    }
+  };
+
+  // Начало перетаскивания
+  const onDragStart = (event, customer, employeeId, time) => {
+    draggedCustomer.value = { customer, employeeId, time };
+    event.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({ customerId: customer.id, employeeId, time })
+    );
+    event.dataTransfer.effectAllowed = "move";
+    console.log("Старт перетаскивания");
+  };
+
+  // Перетаскивание над ячейкой
+  const onDragOver = (event) => {
+    event.preventDefault(); // Разрешаем drop
+  };
+
+  // ! Реализация времени и прокрутки таблицы
+
+  // function nextDayChange() {
+  //   // const next = format(addDays(now, 1), "MMMM yyyy", { locale: ru });
+
+  //   const next = format(addDays(now.value, 1), "EEEE", { locale: ru });
+
+  //   dayOfWeek.value = next;
+  //   console.log(dayOfWeek.value);
+
+  //   console.log(next);
+  // }
+
+  // function previousDayChange() {
+  //   const previous = format(subDays(now. value, 1), "EEEE", { locale: ru });
+
+  //   dayOfWeek.value = previous;
+  //   console.log(dayOfWeek.value);
+  // }
+
+  console.log(dayOfWeek.value);
+
+  // function nextDayChange() {
+  //   now.value = addDays(now.value, 1); // Обновляем дату
+  //   dayOfWeek.value = format(now.value, "EEEE", { locale: ru });
+  //   console.log("Текущий день:", dayOfWeek.value);
+  // }
+
+  // function previousDayChange() {
+  //   now.value = subDays(now.value, 1); // Обновляем дату
+  //   dayOfWeek.value = format(now.value, "EEEE", { locale: ru });
+  //   console.log("Текущий день:", dayOfWeek.value);
+  // }
+
+  function nextDayChange() {
+    now.value = addDays(now.value, 1);
+    updateDates();
+  }
+
+  function previousDayChange() {
+    now.value = subDays(now.value, 1);
+    updateDates();
+  }
+
+  function updateDates() {
+    dayOfWeek.value = format(now.value, "EEEE", { locale: ru });
+    date.value = format(now.value, "dd.MM.yyyy");
+    console.log("Date updated:", date.value); // Для отладки
+  }
+
+  function currentDayChange() {
+    now.value = new Date();
+    updateDates();
   }
 
   return {
@@ -2342,6 +2461,22 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     serviceMainNameValue,
     // customerDidntCome,
     didntCameCustomer,
+
+    // ! drag & drop
+
+    onDrop,
+    onDragStart,
+    onDragOver,
+    draggedCustomer,
+
+    // ! Реализация времени и прокрутки таблицы
+
+    currentDayChange,
+    nextDayChange,
+    previousDayChange,
+    now,
+    date,
+    dayOfWeek,
   };
 });
 

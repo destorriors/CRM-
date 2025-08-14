@@ -44,11 +44,10 @@ watchEffect(() => {
   // console.log(filteredSubByEmployeeSpec.value);
 });
 
-const currentDate = ref("15.07.2025");
+// const currentDate = ref("15.07.2025");
 </script>
 
 <template>
-  <!-- ! Дату выше поменять -->
   <modal-template
     :is-visible="scheduleStore.isModalWindowForScheduleTemplateVisible"
     @close="closeModal"
@@ -58,7 +57,7 @@ const currentDate = ref("15.07.2025");
       :customer="scheduleStore.choosenCustomer"
       :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
       :time="scheduleStore.selectedIdAndTimeForMain.time"
-      :current-date="currentDate"
+      :current-date="scheduleStore.date"
     />
 
     <Transition name="fade">
@@ -66,7 +65,7 @@ const currentDate = ref("15.07.2025");
         v-if="scheduleStore.isCustomerCameToLesson"
         :customer="scheduleStore.choosenCustomer"
         :employee-id="scheduleStore.selectedIdAndTimeForMain.id"
-        :current-date="currentDate"
+        :current-date="scheduleStore.date"
         :time="scheduleStore.selectedIdAndTimeForMain.time"
       />
     </Transition>
