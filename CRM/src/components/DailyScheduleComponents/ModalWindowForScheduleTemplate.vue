@@ -7,6 +7,7 @@ import PaymentForScheduleModal from "./PaymentForScheduleModal.vue";
 // import MyButtonTemplate from "../Ui/MyButtonTemplate.vue";
 
 import InfoForScheduleModal from "./InfoForScheduleModal.vue";
+import { useRouter } from "vue-router";
 
 const scheduleStore = useScheduleStore();
 
@@ -39,12 +40,13 @@ function closeModal() {
 //   return finded || null;
 // });
 
+const router = useRouter();
+
 watchEffect(() => {
   console.log(props.customer);
   // console.log(filteredSubByEmployeeSpec.value);
+  console.log("Дата", scheduleStore.date);
 });
-
-// const currentDate = ref("15.07.2025");
 </script>
 
 <template>
@@ -52,6 +54,11 @@ watchEffect(() => {
     :is-visible="scheduleStore.isModalWindowForScheduleTemplateVisible"
     @close="closeModal"
   >
+    <my-button-template
+      @click="router.push(`customers/${props.customer[0].id}`)"
+      >Перейти на страницу</my-button-template
+    >
+
     <InfoForScheduleModal
       v-if="!scheduleStore.isCustomerCameToLesson"
       :customer="scheduleStore.choosenCustomer"
@@ -69,74 +76,6 @@ watchEffect(() => {
         :time="scheduleStore.selectedIdAndTimeForMain.time"
       />
     </Transition>
-
-    <!-- <div v-for="customer in props.customer" :key="customer.id">
-      <div
-        v-for="(scheduleCus, idx) in customer.schedule"
-        :key="`${customer.id}-${idx}`"
-      >
-        <div
-          v-if="
-            scheduleCus.employeeId === props.employeeId &&
-            scheduleCus.time === props.time
-          "
-        >
-          <span>
-            {{ customer.name }}
-          </span>
-          <span>
-            {{ scheduleCus.description }}
-          </span>
-          <div
-            v-for="(subscription, index) in customer.subscription"
-            :key="`${customer.id}-${index}-subscription`"
-          >
-            <span
-              v-if="
-                filteredSubByEmployeeSpec.speciality.includes(
-                  subscription.typeOfSubs
-                )
-              "
-            >
-              {{ subscription.typeOfSubs }}: {{ subscription.howMuchSubLeft }} -
-              {{ subscription.timeSub }}
-              <my-button-template
-                :red="true"
-                @click="
-                  scheduleStore.removeLessonForSub(
-                    customer.id,
-                    index,
-                    props.employeeId
-                  )
-                "
-                >Списать</my-button-template
-              >
-            </span>
-
-            <span v-else-if="customer.subscription.length === 0">
-              Нет абонемента!
-            </span>
-          </div>
-          <div class="didnt-visit">
-            <my-button-template
-              @click="
-                scheduleStore.calculateLessonWithoutSubForEmployeeSalary(
-                  props.employeeId
-                )
-              "
-              >Клиент оплатил</my-button-template
-            >
-            <my-button-template>Клиент не пришел</my-button-template>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- ! Сделать функционал для отслеживания пришел/не пришел, чтобы ячейка не открывалась больше или открывалась, но с элементом оплачено или не оплачено -->
-    <!-- ! Остановился тут для того, чтобы работал пересчет зп сотруднику на пришел-не пришел, необходимо сначал сделать функционал добавления клиента в таблицу -->
-    <!-- ! Так же необходимо вместо этой кнопки, если есть абик, то списывать абик -->
-    <!-- ! Необходимо прописать функцию и динамические стили, чтобы при нажатии, во первых всплывало окно списать или не списывать абонемент, а во вторых закрасить ячейку в таблице -->
-    <!-- ! Для этого необходимо сделать общую переменную состояния -->
   </modal-template>
 </template>
 

@@ -64,10 +64,6 @@ const router = createRouter({
   routes,
 });
 
-// - <!-- - Добавь дату для будущих или предстоящих событий в зарплате -->
-// - <!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
-// - <!-- - Удали эти коменты, чтобы они не засирали собой функцию -->
-
 router.afterEach((to, from) => {
   if (from.path === "/") {
     const scheduleStore = useScheduleStore();
@@ -75,7 +71,6 @@ router.afterEach((to, from) => {
     scheduleStore.currentDayChange();
 
     console.log("Пользователь ушел с главной страницы");
-    // Дополнительные действия
   }
 });
 

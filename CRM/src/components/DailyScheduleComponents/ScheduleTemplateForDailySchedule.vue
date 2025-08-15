@@ -3,6 +3,7 @@ import { useScheduleStore } from "@/stores/scheduleStore";
 import { computed, watchEffect } from "vue";
 import ModalWindowForScheduleTemplate from "./ModalWindowForScheduleTemplate.vue";
 import { isToday } from "date-fns";
+import { useRouter } from "vue-router";
 
 const scheduleStore = useScheduleStore();
 
@@ -18,6 +19,26 @@ const employessFilteredForDaySchedule = computed(() => {
 //   console.log(`${f}-${s}`);
 // }
 
+const router = useRouter();
+
+function forRoterPath(employeeId) {
+  const findedEmployee = scheduleStore.employees.find((val) => {
+    return val.id === employeeId;
+  });
+
+  const findedSpec = scheduleStore.specialization.find((val) => {
+    return (
+      val.name.toLowerCase() === findedEmployee.speciality[0].toLowerCase()
+    );
+  });
+
+  return findedSpec.forRouterPath || null;
+}
+
+const test2 = [...scheduleStore.customers[0].schedule];
+
+test2.splice(1, 1);
+
 watchEffect(() => {
   console.log(employessFilteredForDaySchedule.value);
   console.log(scheduleStore.dayOfWeek);
@@ -29,6 +50,12 @@ watchEffect(() => {
 
   console.log(isToday(scheduleStore.now));
   console.log(scheduleStore.date);
+
+  console.log(forRoterPath(0));
+
+  console.log(test2);
+
+  console.log(scheduleStore.customers[0].schedule);
 });
 </script>
 
@@ -60,8 +87,12 @@ watchEffect(() => {
       <tr>
         <th></th>
         <th
+          class="employees-names"
           v-for="(employee, idx) in employessFilteredForDaySchedule"
           :key="employee.id"
+          @click="
+            router.push(`employees/${forRoterPath(employee.id)}/${employee.id}`)
+          "
         >
           {{ employee.name }}
         </th>
@@ -78,6 +109,7 @@ watchEffect(() => {
           @drop="scheduleStore.onDrop($event, employee.id, time)"
         >
           <span
+            class="customers"
             v-if="scheduleStore.getCustomerForMainPage(employee.id, time)"
             v-for="cus in scheduleStore.getCustomerForMainPage(
               employee.id,
@@ -127,6 +159,20 @@ watchEffect(() => {
 
 <!-- ! Стили для тега transition, который позволяет настроить анимации -->
 <style scoped>
+/* .main-table {
+  box-sizing: border-box;
+  width: 100px;
+  height: 100px;
+} */
+.customers {
+  cursor: pointer;
+}
+.employees-names {
+  cursor: pointer;
+}
+.employees-names:hover {
+  background-color: rgb(210, 207, 207);
+}
 .cap {
   display: flex;
   justify-content: center;
@@ -175,11 +221,10 @@ caption {
 }
 </style>
 
-<!-- - Найди все date и сделай динамическими -->
-<!-- - Так же сделай так, чтобы после того, как покидалась страница расписания дата менялась -->
-<!-- - Добавь дату для будущих или предстоящих событий в зарплате -->
+<!-- ! Остановился на раздумывании, как реализовать структуру данных для второго расписания -->
+<!-- ! РЕШИТЬ МОЖНО ТОЛЬКО ТАК, НЕОБХОДИМО ПРОСЛЕДИТЬ ВЕСЬ ПУТЬ schedule, от самой первой таблицы, после чего придется подкорректировать его или придумать что с этим можно делать -->
+
 <!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
-<!-- - Удали эти коменты, чтобы они не засирали собой функцию -->
 
 <!-- - ГЛАВНАЯ ЗАДАЧА -->
 <!-- - НЕОБХОДИМО РЕАЛИЗОВАТЬ ВРЕМЯ, ДЛЯ ТОГО, ЧТОБЫ МОЖНО БЫЛО ОТДЕЛИТЬ ДАННЫЕ ДВУХ ТАБЛИЦ ДРУГ ОТ ДРУГА -->
@@ -187,12 +232,7 @@ caption {
 <!-- - ЭТО ЗНАЧИТ, ЧТО НЕОБХОДИМО СДЕЛАТЬ УНИКАЛЬНЫЙ ДЕНЬ, В КОТОРОМ МОЖНО ДЕЛАТЬ ПРАВКИ, А УНИКАЛЬНОСТЬ ПРИДАСТ ТОЧНАЯ ДАТА -->
 <!-- - ИДЕЯ КАКАЯ - КЛИЕНТЫ ЗАПИСАННЫЕ У СПЕЦОВ ДОЛЖНЫ ОТОБРАЖАТСЯ ПО УМОЛЧАНИЮ НЕЗАВИСИМО ОТ ДАТЫ, НО ИЗМЕНЕНИЯ ДОЛЖНЫ ЗАВИСЕТЬ ИСКЛЮЧИТЕЛЬНО ОТ ДАТЫ -->
 
-<!-- ! Так же добавить взаимодействие с именами, чтобы роутером перекидывался на специалиста или клиента -->
 <!-- ! Реализовать напоминалку справа -->
 <!-- ! Подумать как сделать напоминалку с календарем -->
 
-<!-- - Остановился на том, чтобы реализовать промотку вперед и назад по расписанию -->
-<!-- - Для этого нужно прописать дату в сторе, на ее основе сделать динамику и с помощью библиотеки fs реализовать даты -->
 <!-- - Необходимо переделать drag & drop, так чтобы при перемещении создавалась копия в расписании, и при этом основное расписание не затрагивалось -->
-<!-- - Для этого, скорее всего понадобится сделать копию всего расписания или чет подшаманить -->
-<!-- - Так же нужно реализовать перемотку с правильной последовательностью -->

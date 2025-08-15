@@ -1346,7 +1346,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     addLossToAccounting(
       nameForLossToAccounting,
-      +calculateSalaryForEmployeeByOneSubLesson
+      +calculateSalaryForEmployeeByOneSubLesson,
+      date.value
     );
   }
 
@@ -2116,7 +2117,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     addLossToAccounting(
       nameForLossToAccounting,
-      +calculateSalaryForEmployeeByOneWithoutSubLesson
+      +calculateSalaryForEmployeeByOneWithoutSubLesson,
+      date
     );
 
     // - Поменять данные на динамические
@@ -2124,7 +2126,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     addProfitToAccounting(
       nameForLossToAccounting,
       +calculateProfit,
-      date.value,
+      date,
       paymentTypeInput.value
     );
 
