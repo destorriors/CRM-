@@ -186,6 +186,7 @@ function getScheduleEntry(customer, day, time, employeeId) {
 
 onMounted(() => {
   console.log("Компонент загружен, сессии:", scheduleStore.customers);
+  console.log(!scheduleStore.customers[0].schedule[0].date);
 });
 </script>
 

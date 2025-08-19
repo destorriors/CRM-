@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, watch } from "vue";
 import { addDays, format, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -198,42 +198,63 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       phoneNumber: "89099399999",
       schedule: [
         {
+          date: false,
+
+          day: "Понедельник",
+          time: "12:00",
+          employeeId: 0,
+          description: "Заметка вторая",
+        },
+        {
+          date: false,
           day: "Вторник",
           time: "09:00",
           employeeId: 0,
           description: "Что-то в дополнение 1",
         },
         {
+          date: false,
+
           day: "Понедельник",
           time: "10:15",
           employeeId: 0,
           description: "Первый",
         },
         {
+          date: false,
+
           day: "Понедельник",
           time: "10:15",
           employeeId: 5,
           description: "Заметка вторая",
         },
         {
+          date: false,
+
           day: "Среда",
           time: "13:00",
           employeeId: 0,
           description: "Что-то в дополнение 3",
         },
         {
+          date: false,
+
           day: "Среда",
           time: "13:00",
           employeeId: 5,
           description: "Что-то в дополнение 4",
         },
         {
+          date: false,
+
           day: "Четверг",
           time: "13:15",
           employeeId: 0,
           description: "Что-то в дополнение 5",
         },
         {
+          date: false,
+
           day: "Четверг",
           time: "13:15",
           employeeId: 5,
@@ -274,6 +295,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       ],
       schedule: [
         {
+          date: false,
+
           day: "Вторник",
           time: "10:15",
           employeeId: 0,
@@ -298,24 +321,32 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         //   description: "Что-то в дополнение 4",
         // },
         {
+          date: false,
+
           day: "Среда",
           time: "15:15",
           employeeId: 1,
           description: "Что-то в дополнение 5",
         },
         {
+          date: false,
+
           day: "Среда",
           time: "15:15",
           employeeId: 2,
           description: "Что-то в дополнение 6",
         },
         {
+          date: false,
+
           day: "Среда",
           time: "15:15",
           employeeId: 3,
           description: "Что-то в дополнение 7",
         },
         {
+          date: false,
+
           day: "Среда",
           time: "15:15",
           employeeId: 4,
@@ -374,6 +405,8 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       ],
       schedule: [
         {
+          date: false,
+
           day: "Вторник",
           time: "12:00",
           employeeId: 0,
@@ -429,7 +462,11 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
   function getCustomers(day, time, employeeId) {
     return customers.value.filter((customer) => {
       return customer.schedule.some(
-        (s) => s.day === day && s.time === time && s.employeeId === employeeId
+        (s) =>
+          s.day === day &&
+          s.time === time &&
+          s.employeeId === employeeId &&
+          s.date === false
       );
     });
   }
@@ -565,7 +602,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       specialistsId: employeeId !== undefined ? [employeeId] : [],
       schedule:
         day && time !== undefined
-          ? [{ day: day, time: time, employeeId: employeeId }]
+          ? [{ date: false, day: day, time: time, employeeId: employeeId }]
           : [],
       queueToEmployee: [],
       history: [],
@@ -645,6 +682,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
       // Добавляем новую пару день-время
       selectedCustomer.value.schedule.push({
+        date: false,
         day: day,
         time: time,
         employeeId: employeeId,
@@ -672,6 +710,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
       // Добавляем новую пару день-время
       selectedCustomer.value.schedule.push({
+        date: false,
         day: day,
         time: time,
         employeeId: employeeId,
@@ -2211,7 +2250,10 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         const oldScheduleIndex = customers.value[
           customerIndex
         ].schedule.findIndex(
-          (s) => s.employeeId === employeeId && s.time === time
+          (s) =>
+            s.employeeId === employeeId &&
+            s.time === time &&
+            s.date === date.value
         );
         if (oldScheduleIndex !== -1) {
           customers.value[customerIndex].schedule.splice(oldScheduleIndex, 1);
@@ -2219,6 +2261,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
         // Добавляем клиента в новое расписание в локальной копии
         customers.value[customerIndex].schedule.push({
+          date: date.value,
           day: dayOfWeek.value,
           time: targetTime,
           employeeId: targetEmployeeId,
@@ -2232,6 +2275,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
   // Начало перетаскивания
   const onDragStart = (event, customer, employeeId, time) => {
+    copyOnWrite();
     draggedCustomer.value = { customer, employeeId, time };
     event.dataTransfer.setData(
       "text/plain",
@@ -2300,6 +2344,136 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     now.value = new Date();
     updateDates();
   }
+
+  // ! Копирование таблицы
+
+  // const updateSchedule2 = () => {
+  //   customers.value.forEach((customer) => {
+  //     const originalSchedule2 = customer.schedule2 || [];
+  //     const newSchedule2 = JSON.parse(JSON.stringify(customer.schedule)).map((entry) => ({
+  //       ...entry,
+  //       date: new Date().toLocaleDateString("ru-RU"),
+  //     }));
+  //     // Обновляем только если есть изменения
+  //     if (JSON.stringify(originalSchedule2) !== JSON.stringify(newSchedule2)) {
+  //       customer.schedule2 = newSchedule2;
+  //     }
+  //   });
+  // };
+
+  // updateSchedule2();
+  // watch(customers, updateSchedule2, { deep: true });
+
+  // const schedule2 = ref([]);
+
+  function copyOnWrite() {
+    const hasToday = customers?.value.some((s) => {
+      return s.schedule?.some((s) => {
+        return s.date === date.value;
+      });
+    });
+
+    if (!hasToday) {
+      customers.value.forEach((val) => {
+        const filtered = val.schedule.filter((schedule) => {
+          return (
+            schedule.day.toLowerCase() === dayOfWeek.value &&
+            schedule.date === false
+          );
+        });
+
+        const newData = filtered.map((item) => {
+          return { ...item, date: date.value };
+        });
+
+        console.log(filtered);
+
+        val.schedule.push(...newData);
+      });
+    }
+  }
+
+  watch(
+    customers.value,
+    (newValue) => {
+      // console.log(newValue);
+
+      // const hasToday = schedule2.value.some((schedule) => {
+      //   return schedule.some((s) => {
+      //     return s.date === date.value;
+      //   });
+      // });
+
+      // console.log(hasToday);
+      // console.log(date.value);
+
+      // if (!hasToday) {
+      //   const newDateValue = customers.value.map((val) => {
+      //     const newData = val.schedule
+      //       .filter((schedule) => {
+      //         return schedule.day.toLowerCase() === dayOfWeek.value;
+      //       })
+      //       .map((formatedSchedule) => {
+      //         return { ...formatedSchedule, date: date.value };
+      //       });
+
+      //     return newData;
+      //   });
+
+      //   schedule2.value.push(...newDateValue);
+      // }
+
+      // ! Актуальная версия
+
+      const hasToday = customers.value.some((s) => {
+        return s.schedule?.some((s) => {
+          return s.date === date.value;
+        });
+      });
+
+      console.log(hasToday);
+      console.log(date.value);
+
+      if (!hasToday) {
+        customers.value.forEach((val) => {
+          const filtered = val.schedule.filter((schedule) => {
+            return (
+              schedule.day.toLowerCase() === dayOfWeek.value &&
+              schedule.date === false
+            );
+          });
+
+          const newData = filtered.map((item) => {
+            return { ...item, date: date.value };
+          });
+
+          console.log(filtered);
+
+          val.schedule.push(...newData);
+        });
+
+        // console.log(newDateValue);
+
+        // customers.value[0].schedule.push({ ...newDateValue });
+      }
+
+      // console.log(schedule2.value);
+      // console.log(customers.value);
+      console.log(dayOfWeek.value);
+      console.log(customers.value);
+
+      // - Третий вариант
+
+      // copyOnWrite();
+
+      // console.log(customers.value);
+    },
+    { deep: true }
+  );
+
+  // ! Так вроде эта залупа работает, но не уверен на все 100%
+  // ! Необходимо изменить drag & drop так, чтобы можно было перетаскивать только записи с датой
+  // ! Необходимо поменять условия отрисовки в шаблоне, чтобы отрисовывались либо даты, либо без дат
 
   return {
     employees,

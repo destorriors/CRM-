@@ -35,28 +35,38 @@ function forRoterPath(employeeId) {
   return findedSpec.forRouterPath || null;
 }
 
-const test2 = [...scheduleStore.customers[0].schedule];
-
-test2.splice(1, 1);
+const checkSchedule = computed(() => {
+  return scheduleStore.customers.some((s) => {
+    return s.schedule?.some((s) => {
+      return s.date === scheduleStore.date;
+    });
+  });
+});
 
 watchEffect(() => {
-  console.log(employessFilteredForDaySchedule.value);
-  console.log(scheduleStore.dayOfWeek);
-  console.log(
-    scheduleStore.customers[0].schedule.find((val) => {
-      return val.day === "Понедельник";
-    })
-  );
+  // console.log(employessFilteredForDaySchedule.value);
+  // console.log(scheduleStore.dayOfWeek);
+  // console.log(
+  //   scheduleStore.customers[0].schedule.find((val) => {
+  //     return val.day === "Понедельник";
+  //   })
+  // );
 
-  console.log(isToday(scheduleStore.now));
-  console.log(scheduleStore.date);
+  // console.log(isToday(scheduleStore.now));
+  // console.log(scheduleStore.date);
 
-  console.log(forRoterPath(0));
+  // console.log(forRoterPath(0));
 
-  console.log(test2);
-
-  console.log(scheduleStore.customers[0].schedule);
+  console.log(checkSchedule.value);
 });
+
+// watch(
+//   scheduleStore.customers,
+//   (newValue, oldValue) => {
+//     console.log(`Изменились пассажиры ${newValue} а вот старое`, oldValue);
+//   },
+//   { deep: true }
+// );
 </script>
 
 <template>
@@ -127,16 +137,31 @@ watchEffect(() => {
               )
             "
           >
-            <span v-for="cusSchedule in cus.schedule">
+            <span v-if="!checkSchedule" v-for="cusSchedule in cus.schedule">
               <span
                 v-if="
                   cusSchedule.employeeId === employee.id &&
-                  cusSchedule.time === time
+                  cusSchedule.time === time &&
+                  cusSchedule.date === false
                 "
               >
                 Имя ребенка: {{ cus.name }}
                 <hr />
                 Заментка на день: {{ cusSchedule.description }}
+              </span>
+            </span>
+
+            <span v-if="checkSchedule" v-for="cusSchedule2 in cus.schedule">
+              <span
+                v-if="
+                  cusSchedule2.employeeId === employee.id &&
+                  cusSchedule2.time === time &&
+                  cusSchedule2.date === scheduleStore.date
+                "
+              >
+                ЗАЛУПА Имя ребенка: {{ cus.name }}
+                <hr />
+                Заментка на день: {{ cusSchedule2.description }}
               </span>
             </span>
           </span>
@@ -221,8 +246,15 @@ caption {
 }
 </style>
 
-<!-- ! Остановился на раздумывании, как реализовать структуру данных для второго расписания -->
-<!-- ! РЕШИТЬ МОЖНО ТОЛЬКО ТАК, НЕОБХОДИМО ПРОСЛЕДИТЬ ВЕСЬ ПУТЬ schedule, от самой первой таблицы, после чего придется подкорректировать его или придумать что с этим можно делать -->
+<!-- - блЯТЬ, ВНАТУРЕ ДЕЛО В ОТОБРАЖЕНИИ, ХУИТА, КОТОРАЯ НЕ ДОЛЖНА ПОПАДАТЬ В ТАБЛИЦУ, НЕ ДОЛЖНА ТУПО ОТОБРАЖАТСЯ -->
+<!-- - ВНАТУРЕ ДОСТАТОЧНО ПРОСТО ДОБАВИТЬ ЕЩЕ ОДИН ПУНКТ, ВМЕСТО КОПИРОВАНИЯ ВСЕЙ ТАБЛИЦЫ -->
+<!-- - Что делать  -->
+<!-- - 1 - Сделай функцию компутед или какуюто переборку, для того, чтобы проверять у каждого элемента в schedule true или дата стоит в date, нужно для того, чтобы отделить две таблицы друг от друга -->
+<!-- - 2 - Создать автодобавлятор времени на главную страницу с датой, чтобы потом отображать только данные с датой -->
+<!-- - 3 - Отфильтровать уже на главной странице данные, которые не содержать date:false -->
+<!-- - 4 - Изменить drag & drop так, чтобы только данные с датами менялись и удалялись, а оригиналье трогались, но тут нужно подумать куда пропихнуть функцию добавления времени, чтобы данные не копировались снова при обновлении страницы, тут нужно подумать, скорее всего поставить watcher, чтобы он смотрел и не позволял копировать данные, которые будут дублироватся -->
+<!-- - 5 - Протестировать это с добавлением новых клиентов и т.д. -->
+<!-- - 6 - Так же добавить возможность добавления клиентов на главную, с пунктами, которые позволять добавить сразу в расписание к сотруднику, либо же добавлять только на главную -->
 
 <!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
 
