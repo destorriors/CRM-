@@ -2101,6 +2101,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: employeeId,
       time: time,
     };
+    copyOnWrite();
   }
 
   function closeModalWindowForScheduleTemplate() {
@@ -2215,7 +2216,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     // findedCustomer.history.push(dataForHistoryOfCustomer);
 
-    pushToCustomerHistory(customerId, false, false, time, date.value);
+    pushToCustomerHistory(customerId, false, false, time, date);
 
     console.log(customerId, date.value, time);
     console.log(
@@ -2386,8 +2387,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
           return { ...item, date: date.value };
         });
 
-        console.log(filtered);
-
         val.schedule.push(...newData);
       });
     }
@@ -2451,10 +2450,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
           val.schedule.push(...newData);
         });
-
-        // console.log(newDateValue);
-
-        // customers.value[0].schedule.push({ ...newDateValue });
       }
 
       // console.log(schedule2.value);
@@ -2471,9 +2466,13 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     { deep: true }
   );
 
-  // ! Так вроде эта залупа работает, но не уверен на все 100%
-  // ! Необходимо изменить drag & drop так, чтобы можно было перетаскивать только записи с датой
-  // ! Необходимо поменять условия отрисовки в шаблоне, чтобы отрисовывались либо даты, либо без дат
+  const checkSchedule = computed(() => {
+    return customers.value.some((s) => {
+      return s.schedule?.some((s) => {
+        return s.date === date.value;
+      });
+    });
+  });
 
   return {
     employees,
@@ -2653,7 +2652,9 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     now,
     date,
     dayOfWeek,
+    checkSchedule,
   };
 });
 
 // ! Обыграть ошибку при отсутсвии данных вообще
+// - Ты хочешь сделать стеклянный дизайн, как в ios
