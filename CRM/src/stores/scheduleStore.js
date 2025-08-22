@@ -591,7 +591,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     resetAddCustomersInputs();
   }
 
-  function newCustomer(employeeId, day, time) {
+  function newCustomer(employeeId, day, time, date, specId) {
     const newCustomer = {
       id: customers.value.length + 1,
       name: customerInputs.value.childNameInput,
@@ -599,10 +599,17 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       parentName: customerInputs.value.parentName,
       phoneNumber: customerInputs.value.phoneNumber,
       subscription: [],
-      specialistsId: employeeId !== undefined ? [employeeId] : [],
+      specialistsId: specId !== undefined ? [] : [employeeId],
       schedule:
         day && time !== undefined
-          ? [{ date: false, day: day, time: time, employeeId: employeeId }]
+          ? [
+              {
+                date: date || false,
+                day: day,
+                time: time,
+                employeeId: employeeId,
+              },
+            ]
           : [],
       queueToEmployee: [],
       history: [],
@@ -610,29 +617,20 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     return newCustomer;
   }
 
-  // ! Главное добавление клиентов
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // ! Необходимо придумать, как объединить все функции добавления клиентов
+  // - Остановился здесь, необходимо сделать рефактор функции так, чтобы разделить для всех трех модулей
+  // - Надо подумать как дату добавлять, делать ли сразу cow или только по запросу
 
-  // function addMainCustomers() {
-  //   if (
-  //     !customerInputs.value.childNameInput &&
-  //     !customerInputs.value.parentName
-  //   ) {
-  //     alert("Введите данные");
-  //   } else {
-  //     customers.value.push(newCustomer());
+  function closeMainTableModalWindow() {
+    console.log("ОНО НАХУЙ, Я ТУТ");
 
-  //     resetAddCustomersInputs();
+    resetAddCustomersInputs();
 
-  //     console.log(customers.value);
-  //     closeAddCustomers();
-  //   }
-  // }
+    closeAddingCustomersToMainTable();
 
-  // !!1111111111111111111111111111111111111111111111111111111111111111111111111111
+    selectedCustomer.value = null;
+  }
 
-  function addCustomers(employeeId, day, time, forMainMode) {
+  function addCustomers(employeeId, day, time, forMainMode, forMainTableMode) {
     if (toggleAddCustomer.value === 1 || forMainMode) {
       // ! Режим новый
       if (
@@ -641,23 +639,19 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       ) {
         alert("Введите данные");
       } else {
-        // const newCustomer = {
-        //   id: customers.value.length + 1,
-        //   name: customerInputs.value.childNameInput,
-        //   description: customerInputs.value.description,
-        //   parentName: customerInputs.value.parentName,
-        //   phoneNumber: customerInputs.value.phoneNumber,
-        //   subscription: [],
-        //   specialistsId: [employeeId],
-        //   schedule: [{ day: day, time: time, employeeId: employeeId }],
-        //   queueToEmployee: [],
-        // };
+        if (forMainTableMode) {
+          customers.value.push(
+            newCustomer(employeeId, day, time, date.value, employeeId)
+          );
+
+          closeMainTableModalWindow();
+
+          return;
+        }
 
         customers.value.push(newCustomer(employeeId, day, time));
 
         resetAddCustomersInputs();
-
-        console.log(customers.value);
 
         if (forMainMode) {
           closeAddModalWindow();
@@ -672,9 +666,23 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
         return;
       }
 
+      if (forMainTableMode) {
+        selectedCustomer.value.schedule.push({
+          date: date.value,
+          day: day,
+          time: time,
+          employeeId: employeeId,
+        });
+
+        closeMainTableModalWindow();
+
+        return;
+      }
       const idx = selectedCustomer.value.queueToEmployee?.findIndex((val) => {
         return val === employeeId;
       });
+
+      console.log("Не сработало");
 
       if (selectedCustomer.value.queueToEmployee?.includes(idx)) {
         selectedCustomer.value.queueToEmployee.splice(idx, 1);
@@ -690,6 +698,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
       if (!selectedCustomer.value.specialistsId.includes(employeeId)) {
         selectedCustomer.value.specialistsId.push(employeeId);
+        console.log("Ну вот эта залупа сработала");
       }
       console.log("Обновлённый список клиентов:", customers.value);
       selectedCustomer.value = null; // Сбрасываем выбор
@@ -698,6 +707,19 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       //! Режим в очереди
       if (!selectedCustomer.value) {
         alert("Выберите клиента из списка");
+        return;
+      }
+
+      if (forMainTableMode) {
+        selectedCustomer.value.schedule.push({
+          date: date.value,
+          day: day,
+          time: time,
+          employeeId: employeeId,
+        });
+
+        closeMainTableModalWindow();
+
         return;
       }
 
@@ -2101,7 +2123,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       id: employeeId,
       time: time,
     };
-    copyOnWrite();
+    // copyOnWrite();
   }
 
   function closeModalWindowForScheduleTemplate() {
@@ -2112,15 +2134,23 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
   function getCustomerForMainPage(employeeId, time) {
     const currentCustomer = customers.value.filter((val) => {
       return val.schedule.some((cur) => {
-        return (
-          cur.employeeId === employeeId &&
-          cur.day.toLowerCase() === dayOfWeek.value.toLowerCase() &&
-          cur.time === time
-        );
+        if (checkSchedule.value) {
+          return (
+            cur.employeeId === employeeId &&
+            cur.day.toLowerCase() === dayOfWeek.value.toLowerCase() &&
+            cur.time === time &&
+            cur.date === date.value
+          );
+        } else if (!checkSchedule.value) {
+          return (
+            cur.employeeId === employeeId &&
+            cur.day.toLowerCase() === dayOfWeek.value.toLowerCase() &&
+            cur.time === time &&
+            cur.date === false
+          );
+        }
       });
     });
-
-    //! Не забудь поменять день недели на динамический
 
     return currentCustomer || false;
   }
@@ -2446,7 +2476,7 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
             return { ...item, date: date.value };
           });
 
-          console.log(filtered);
+          // console.log(filtered);
 
           val.schedule.push(...newData);
         });
@@ -2473,6 +2503,39 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
       });
     });
   });
+
+  // ! Добавление клиента в главную таблицу
+
+  const isOpeneModalForMainPageTable = ref(false);
+  const hoveredCellForMainPage = ref(null);
+  const activeCellForMainPageTable = ref(null);
+
+  function showAddIconForMainPage(idx, time) {
+    hoveredCellForMainPage.value = `${idx}-${time}`;
+  }
+
+  function isAddIconForMainPageVisible(idx, time) {
+    return hoveredCellForMainPage.value === `${idx}-${time}`;
+  }
+
+  function hideAddIconForMainPage() {
+    if (!activeCellForMainPageTable.value) {
+      hoveredCellForMainPage.value = null;
+    }
+  }
+
+  function openModalForMainPageToAddCustomer(idx, time) {
+    isOpeneModalForMainPageTable.value = true;
+    activeCellForMainPageTable.value = `${idx}-${time}`;
+    copyOnWrite();
+  }
+
+  function closeAddingCustomersToMainTable() {
+    hoveredCellForMainPage.value = null;
+    isOpeneModalForMainPageTable.value = false;
+    activeCellForMainPageTable.value = null;
+    resetAddCustomersInputs();
+  }
 
   return {
     employees,
@@ -2652,7 +2715,20 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     now,
     date,
     dayOfWeek,
+
+    // ! Копирование таблицы
     checkSchedule,
+
+    // ! Добавление клиента в главную таблицу
+
+    isOpeneModalForMainPageTable,
+    showAddIconForMainPage,
+
+    hideAddIconForMainPage,
+
+    isAddIconForMainPageVisible,
+    openModalForMainPageToAddCustomer,
+    closeAddingCustomersToMainTable,
   };
 });
 

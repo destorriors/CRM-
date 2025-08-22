@@ -4,6 +4,7 @@ import { computed, watchEffect } from "vue";
 import ModalWindowForScheduleTemplate from "./ModalWindowForScheduleTemplate.vue";
 import { isToday } from "date-fns";
 import { useRouter } from "vue-router";
+import AddCustomerModalWindow from "../AddCustomerModalWindow.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -14,10 +15,6 @@ const employessFilteredForDaySchedule = computed(() => {
     );
   });
 });
-
-// function test(f, s) {
-//   console.log(`${f}-${s}`);
-// }
 
 const router = useRouter();
 
@@ -35,38 +32,9 @@ function forRoterPath(employeeId) {
   return findedSpec.forRouterPath || null;
 }
 
-// const checkSchedule = computed(() => {
-//   return scheduleStore.customers.some((s) => {
-//     return s.schedule?.some((s) => {
-//       return s.date === scheduleStore.date;
-//     });
-//   });
-// });
-
 watchEffect(() => {
-  // console.log(employessFilteredForDaySchedule.value);
-  // console.log(scheduleStore.dayOfWeek);
-  // console.log(
-  //   scheduleStore.customers[0].schedule.find((val) => {
-  //     return val.day === "Понедельник";
-  //   })
-  // );
-
-  // console.log(isToday(scheduleStore.now));
-  // console.log(scheduleStore.date);
-
-  // console.log(forRoterPath(0));
-
   console.log(scheduleStore.checkSchedule);
 });
-
-// watch(
-//   scheduleStore.customers,
-//   (newValue, oldValue) => {
-//     console.log(`Изменились пассажиры ${newValue} а вот старое`, oldValue);
-//   },
-//   { deep: true }
-// );
 </script>
 
 <template>
@@ -117,6 +85,8 @@ watchEffect(() => {
           :key="`${employee}-${time}`"
           @dragover="scheduleStore.onDragOver"
           @drop="scheduleStore.onDrop($event, employee.id, time)"
+          @mouseover="scheduleStore.showAddIconForMainPage(idx, time)"
+          @mouseleave="scheduleStore.hideAddIconForMainPage"
         >
           <span
             class="customers"
@@ -171,6 +141,32 @@ watchEffect(() => {
               </span>
             </span>
           </span>
+          <span
+            class="add-icon"
+            v-if="
+              scheduleStore.isAddIconForMainPageVisible(idx, time) &&
+              !scheduleStore.getCustomerForMainPage(employee.id, time).length
+            "
+            @click.stop="
+              scheduleStore.openModalForMainPageToAddCustomer(idx, time)
+            "
+          >
+            +
+          </span>
+          <Transition name="fade">
+            <AddCustomerModalWindow
+              v-if="
+                scheduleStore.isOpeneModalForMainPageTable &&
+                scheduleStore.isAddIconForMainPageVisible(idx, time)
+              "
+              :for-main-table="true"
+              :is-visible="scheduleStore.isAddIconForMainPageVisible(idx, time)"
+              :day="scheduleStore.dayOfWeek"
+              :time="time"
+              @closeAddCustomers="scheduleStore.closeAddingCustomersToMainTable"
+              :employee-id="employee.id"
+            />
+          </Transition>
         </td>
       </tr>
 
@@ -190,6 +186,15 @@ watchEffect(() => {
 
 <!-- ! Стили для тега transition, который позволяет настроить анимации -->
 <style scoped>
+.add-icon {
+  position: relative;
+  background-color: rgba(44, 160, 255, 0.138);
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
 /* .main-table {
   box-sizing: border-box;
   width: 100px;
@@ -209,7 +214,7 @@ watchEffect(() => {
   justify-content: center;
   align-items: center;
 }
-/* .fade-enter-active,
+.fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
@@ -222,7 +227,7 @@ watchEffect(() => {
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;
-} */
+}
 
 /* .main-table {
   position: relative;
@@ -251,10 +256,6 @@ caption {
   font-weight: 800;
 }
 </style>
-
-<!-- ! Остановился на том, чтобы создать быстрое добавление клиентов на клавной странице -->
-
-<!-- - 6 - Так же добавить возможность добавления клиентов на главную, с пунктами, которые позволять добавить сразу в расписание к сотруднику, либо же добавлять только на главную -->
 
 <!-- - Блокируй возможнось в будущем или прошлом подтверждать данные, только на сегодняшний день -->
 

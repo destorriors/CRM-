@@ -1,8 +1,6 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
 
-const scheduleStore = useScheduleStore();
-
 const props = defineProps({
   employeeId: {
     type: [String, Number],
@@ -25,6 +23,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+const scheduleStore = useScheduleStore();
 </script>
 
 <template>
@@ -39,44 +39,26 @@ const props = defineProps({
       )
     "
   >
-    <div>
-      <label for="childrenName">Имя ребёнка </label>
-      <input
-        type="text"
-        id="childrenName"
-        v-model="scheduleStore.customerInputs.childNameInput"
-        placeholder="Обязательное поле"
-        v-focus
-      />
-    </div>
-    <div>
-      <label for="parentName">Имя родителя </label>
-      <input
-        type="text"
-        id="parentName"
-        v-model="scheduleStore.customerInputs.parentName"
-      />
-    </div>
-    <div>
-      <label for="phoneNumber">Номер телефона </label>
-      <input
-        type="text"
-        id="phoneNumber"
-        v-model="scheduleStore.customerInputs.phoneNumber"
-      />
-    </div>
-    <div>
-      <label for="description">Комментарий </label>
-      <input
-        type="text"
-        id="description"
-        v-model="scheduleStore.customerInputs.description"
-      />
-    </div>
+    <select
+      name="customers"
+      id="customers"
+      v-model="scheduleStore.selectedCustomer"
+    >
+      <option disabled value="null" selected>Выберите из списка</option>
+      <option
+        v-for="(customer, idx) in scheduleStore.getCustomersQueue(
+          props.employeeId
+        )"
+        :key="idx"
+        :value="customer"
+      >
+        {{ customer.name }}
+      </option>
+    </select>
     <button
       type="submit"
-      :class="{ invalidData: !scheduleStore.customerInputs.childNameInput }"
-      :disabled="!scheduleStore.customerInputs.childNameInput"
+      :class="{ invalidData: !scheduleStore.selectedCustomer }"
+      :disabled="!scheduleStore.selectedCustomer"
     >
       Добавить
     </button>

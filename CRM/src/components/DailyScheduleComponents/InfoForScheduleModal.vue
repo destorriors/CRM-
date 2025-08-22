@@ -103,9 +103,13 @@ watchEffect(() => {
     >
       <div
         v-if="
-          scheduleCus.employeeId === props.employeeId &&
-          scheduleCus.time === props.time &&
-          scheduleCus.date === props.currentDate
+          (scheduleCus.employeeId === props.employeeId &&
+            scheduleCus.time === props.time &&
+            scheduleCus.date === props.currentDate) ||
+          (scheduleCus.employeeId === props.employeeId &&
+            scheduleCus.time === props.time &&
+            scheduleCus.date === false &&
+            !scheduleStore.checkSchedule)
         "
       >
         <span>
@@ -213,10 +217,6 @@ span {
   margin-top: 15px;
 }
 </style>
-
-<!-- ! Задача какая, необходимо проследить за списанием абика, подвязать все к новым обстоятельствам -->
-<!-- ! Так как мне кажется, что данные дублируются, нужно найти эти данные и поставить условия -->
-<!-- ! К тому же необходимо реализовать нормально кнопку клиент не пришел, чтобы она хотябы работала -->
 
 <!-- history: [
 {

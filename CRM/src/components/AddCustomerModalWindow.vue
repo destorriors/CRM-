@@ -1,6 +1,8 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
 import AddNewCustomerComponent from "./AddNewCustomerComponent.vue";
+import AddExistingCustomerComponent from "./AddExistingCustomerComponent.vue";
+import AddFromQueueCustomerComponent from "./AddFromQueueCustomerComponent.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -21,76 +23,18 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+
+  forMain: {
+    type: Boolean,
+    default: false,
+  },
+  forMainTable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["closeAddCustomers"]);
-
-// const childNameInput = ref("");
-// const parentName = ref("");
-// const description = ref("");
-// const toggleAddCustomer = ref(1);
-// const selectedCustomer = ref(null);
-
-// function toggleNew() {
-//   toggleAddCustomer.value = 1;
-// }
-
-// function toggleExist() {
-//   toggleAddCustomer.value = 2;
-// }
-
-// id: 1,
-//       parentName: "Ольга",
-//       name: "Клиент 1",
-//       day: ["Понедельник", "Среда", "Четверг"],
-//       time: ["10:15", "13:00", "13:00"],
-//       subscription: "Нейрик",
-//       description: "Some description",
-//       specialistsId: [0, 5],
-
-// function addCustomers() {
-//   if (toggleAddCustomer.value === 1) {
-//     if (!childNameInput.value && !parentName.value) {
-//       alert("Введите данные");
-//     } else {
-//       const newCustomer = {
-//         id: scheduleStore.customers.length + 1,
-//         name: childNameInput.value,
-//         description: description.value,
-//         parentName: parentName.value,
-//         specialistsId: [props.employeeId],
-//         schedule: [
-//           { day: props.day, time: props.time, employeeId: props.employeeId },
-//         ],
-//       };
-//       scheduleStore.customers.push(newCustomer);
-//       childNameInput.value = "";
-//       parentName.value = "";
-//       description.value = "";
-//       console.log(scheduleStore.customers);
-//       emit("closeAddCustomers"); // Закрываем модальное окно после добавления
-//     }
-//   } else {
-//     // Режим "Существующий"
-//     if (!selectedCustomer.value) {
-//       alert("Выберите клиента из списка");
-//       return;
-//     }
-//     // Добавляем новую пару день-время
-//     selectedCustomer.value.schedule.push({
-//       day: props.day,
-//       time: props.time,
-//       employeeId: props.employeeId,
-//     });
-
-//     if (!selectedCustomer.value.specialistsId.includes(props.employeeId)) {
-//       selectedCustomer.value.specialistsId.push(props.employeeId);
-//     }
-//     console.log("Обновлённый список клиентов:", scheduleStore.customers);
-//     selectedCustomer.value = null; // Сбрасываем выбор
-//     emit("closeAddCustomers");
-//   }
-// }
 
 function closeAddCustomers() {
   emit("closeAddCustomers");
@@ -128,127 +72,35 @@ function closeAddCustomers() {
           В очереди
         </button>
       </div>
-      <!-- <form
-        @submit.prevent="
-          scheduleStore.addCustomers(props.employeeId, props.day, props.time)
-        "
-        v-if="scheduleStore.toggleAddCustomer === 1"
-      >
-        <div>
-          <label for="childrenName">Имя ребёнка </label>
-          <input
-            type="text"
-            id="childrenName"
-            v-model="scheduleStore.customerInputs.childNameInput"
-            placeholder="Обязательное поле"
-            v-focus
-          />
-        </div>
-        <div>
-          <label for="parentName">Имя родителя </label>
-          <input
-            type="text"
-            id="parentName"
-            v-model="scheduleStore.customerInputs.parentName"
-          />
-        </div>
-        <div>
-          <label for="phoneNumber">Номер телефона </label>
-          <input
-            type="text"
-            id="phoneNumber"
-            v-model="scheduleStore.customerInputs.phoneNumber"
-          />
-        </div>
-        <div>
-          <label for="description">Комментарий </label>
-          <input
-            type="text"
-            id="description"
-            v-model="scheduleStore.customerInputs.description"
-          />
-        </div>
-        <button
-          type="submit"
-          :class="{ invalidData: !scheduleStore.customerInputs.childNameInput }"
-          :disabled="!scheduleStore.customerInputs.childNameInput"
-        >
-          Добавить
-        </button>
-      </form> -->
-
       <AddNewCustomerComponent
         v-if="scheduleStore.toggleAddCustomer === 1"
+        :for-main-table="props.forMainTable"
         :day="props.day"
         :employee-id="props.employeeId"
         :time="props.time"
-        :for-main="false"
-        @add-customers="
-          scheduleStore.addCustomers(props.employeeId, props.day, props.time)
-        "
+        :for-main="props.forMain"
       />
 
-      <form
-        @submit.prevent="
-          scheduleStore.addCustomers(props.employeeId, props.day, props.time)
-        "
+      <AddExistingCustomerComponent
         v-if="scheduleStore.toggleAddCustomer === 2"
-      >
-        <select
-          name="customers"
-          id="customers"
-          v-model="scheduleStore.selectedCustomer"
-        >
-          <option disabled value="null" selected>Выберите из списка</option>
-          <option
-            v-for="(customer, idx) in scheduleStore.customers"
-            :key="idx"
-            :value="customer"
-          >
-            {{ customer.name }}
-          </option>
-        </select>
-        <button
-          type="submit"
-          :class="{ invalidData: !scheduleStore.selectedCustomer }"
-          :disabled="!scheduleStore.selectedCustomer"
-        >
-          Добавить
-        </button>
-      </form>
-      <form
-        @submit.prevent="
-          scheduleStore.addCustomers(props.employeeId, props.day, props.time)
-        "
+        :for-main-table="props.forMainTable"
+        :day="props.day"
+        :employee-id="props.employeeId"
+        :time="props.time"
+        :for-main="props.forMain"
+      />
+
+      <AddFromQueueCustomerComponent
         v-if="
           scheduleStore.toggleAddCustomer === 3 &&
           scheduleStore.getCustomersQueue(props.employeeId).length !== 0
         "
-      >
-        <select
-          name="customers"
-          id="customers"
-          v-model="scheduleStore.selectedCustomer"
-        >
-          <option disabled value="null" selected>Выберите из списка</option>
-          <option
-            v-for="(customer, idx) in scheduleStore.getCustomersQueue(
-              props.employeeId
-            )"
-            :key="idx"
-            :value="customer"
-          >
-            {{ customer.name }}
-          </option>
-        </select>
-        <button
-          type="submit"
-          :class="{ invalidData: !scheduleStore.selectedCustomer }"
-          :disabled="!scheduleStore.selectedCustomer"
-        >
-          Добавить
-        </button>
-      </form>
+        :for-main-table="props.forMainTable"
+        :day="props.day"
+        :employee-id="props.employeeId"
+        :time="props.time"
+        :for-main="props.forMain"
+      />
     </div>
   </div>
 </template>

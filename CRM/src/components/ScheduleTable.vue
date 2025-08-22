@@ -58,11 +58,12 @@
                 isTimeInWorkHours(day, time) &&
                 scheduleStore.isInputVisible(day, time)
               "
+              :for-main-table="false"
               :is-visible="scheduleStore.isInputVisible(day, time)"
               :day="day"
               :time="time"
-              @closeAddCustomers="scheduleStore.closeAddCustomers"
               :employee-id="employee.id"
+              @closeAddCustomers="scheduleStore.closeAddCustomers"
             />
           </td>
         </tr>
