@@ -135,9 +135,12 @@ watchEffect(() => {
                   cusSchedule2.date === scheduleStore.date
                 "
               >
-                ЗАЛУПА Имя ребенка: {{ cus.name }}
-                <hr />
-                Заментка на день: {{ cusSchedule2.description }}
+                <span> ЗАЛУПА Имя ребенка: {{ cus.name }} </span>
+
+                <span v-if="cusSchedule2.description">
+                  <hr />
+                  Заментка на день: {{ cusSchedule2.description }}
+                </span>
               </span>
             </span>
           </span>

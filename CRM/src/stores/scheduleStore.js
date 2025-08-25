@@ -2537,6 +2537,45 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     resetAddCustomersInputs();
   }
 
+  const mainPageCommentByChooseDay = ref("");
+
+  const isAddingComment = ref(false);
+
+  function startAddingOrEdittingComentToMainPage(customerId, idx) {
+    const customer = findCustomer(customerId);
+    if (customer && customer.schedule[idx]?.description) {
+      mainPageCommentByChooseDay.value = customer.schedule[idx].description; // Устанавливаем текущее значение
+    } else {
+      mainPageCommentByChooseDay.value = ""; // Очищаем, если нет описания
+    }
+    isAddingComment.value = !isAddingComment.value;
+  }
+
+  function addCommentToCustomerInMainPage(customerId, idx) {
+    const customer = findCustomer(customerId);
+
+    // if (customer.schedule[idx]?.description) {
+    //   mainPageCommentByChooseDay.value = customer.schedule[idx].description;
+    //   console.log("Наконец-то сработала эта залупа");
+    //   console.log(customer.schedule[idx].description);
+    // }
+
+    if (
+      customer.schedule[idx].date &&
+      customer &&
+      mainPageCommentByChooseDay.value !== ""
+    ) {
+      customer.schedule[idx].description = mainPageCommentByChooseDay.value;
+
+      console.log("Сработала эта залупа");
+    }
+
+    console.log(customer);
+
+    mainPageCommentByChooseDay.value = "";
+    isAddingComment.value = false;
+  }
+
   return {
     employees,
     customers,
@@ -2729,6 +2768,11 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     isAddIconForMainPageVisible,
     openModalForMainPageToAddCustomer,
     closeAddingCustomersToMainTable,
+
+    mainPageCommentByChooseDay,
+    addCommentToCustomerInMainPage,
+    isAddingComment,
+    startAddingOrEdittingComentToMainPage,
   };
 });
 

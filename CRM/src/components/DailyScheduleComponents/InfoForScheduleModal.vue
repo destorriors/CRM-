@@ -1,7 +1,8 @@
 <script setup>
 import { useScheduleStore } from "@/stores/scheduleStore";
 import MyButtonTemplate from "../Ui/MyButtonTemplate.vue";
-import { computed, ref, watchEffect } from "vue";
+import { computed, watchEffect } from "vue";
+import MyInputTextTemplate from "../Ui/MyInputTextTemplate.vue";
 
 const scheduleStore = useScheduleStore();
 
@@ -112,12 +113,51 @@ watchEffect(() => {
             !scheduleStore.checkSchedule)
         "
       >
+        <div>
+          <my-button-template
+            v-if="!scheduleStore.isAddingComment && !scheduleCus.description"
+            @click="
+              scheduleStore.startAddingOrEdittingComentToMainPage(
+                customer.id,
+                idx
+              )
+            "
+            >Добавить заметку</my-button-template
+          >
+          <my-button-template
+            v-if="scheduleCus.description && !scheduleStore.isAddingComment"
+            @click="
+              scheduleStore.startAddingOrEdittingComentToMainPage(
+                customer.id,
+                idx
+              )
+            "
+            >Изменить заметку</my-button-template
+          >
+          <div v-if="scheduleStore.isAddingComment">
+            <MyInputTextTemplate
+              label-of-input="Заметка на этот день:"
+              v-model="scheduleStore.mainPageCommentByChooseDay"
+              name="commentDay"
+              v-focus
+            />
+            <my-button-template
+              @click="
+                scheduleStore.addCommentToCustomerInMainPage(customer.id, idx)
+              "
+              >Сохранить</my-button-template
+            >
+          </div>
+        </div>
+
+        <span v-if="scheduleCus.description && !scheduleStore.isAddingComment"
+          >Заметка на этот день: {{ scheduleCus.description }}</span
+        >
+
         <span>
           {{ customer.name }}
         </span>
-        <span>
-          {{ scheduleCus.description }}
-        </span>
+
         <div
           v-for="(subscription, index) in customer.subscription"
           :key="`${customer.id}-${index}-subscription`"
@@ -225,3 +265,7 @@ span {
   time: "09:00",
   date: "15.07.2025",
 }, -->
+
+<!-- - Необходимо реализовать функционал замены сотрудников -->
+
+<!-- - Далее иди дорабатывать зарплату или календарь сделай -->
