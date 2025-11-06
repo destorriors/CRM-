@@ -2790,5 +2790,3 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
 // ! Обыграть ошибку при отсутсвии данных вообще
 // - Ты хочешь сделать стеклянный дизайн, как в ios
-
-// Тест
