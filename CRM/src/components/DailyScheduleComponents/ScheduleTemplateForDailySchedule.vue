@@ -63,7 +63,7 @@ watchEffect(() => {
   <table class="main-table">
     <thead>
       <tr>
-        <th></th>
+        <th><my-button-template>Замена</my-button-template></th>
         <th
           class="employees-names"
           v-for="(employee, idx) in employessFilteredForDaySchedule"

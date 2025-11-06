@@ -2554,12 +2554,6 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
   function addCommentToCustomerInMainPage(customerId, idx) {
     const customer = findCustomer(customerId);
 
-    // if (customer.schedule[idx]?.description) {
-    //   mainPageCommentByChooseDay.value = customer.schedule[idx].description;
-    //   console.log("Наконец-то сработала эта залупа");
-    //   console.log(customer.schedule[idx].description);
-    // }
-
     if (
       customer.schedule[idx].date &&
       customer &&
@@ -2574,6 +2568,18 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
 
     mainPageCommentByChooseDay.value = "";
     isAddingComment.value = false;
+  }
+
+  // ! Замена сотрудников
+
+  const isReplaceEmployeeActive = ref(false);
+
+  function openModalEmployeeReplacement() {
+    isReplaceEmployeeActive.value = true;
+  }
+
+  function closeEmployeeReplacement() {
+    isReplaceEmployeeActive.value = false;
   }
 
   return {
@@ -2773,6 +2779,12 @@ export const useScheduleStore = defineStore("scheduleStore", () => {
     addCommentToCustomerInMainPage,
     isAddingComment,
     startAddingOrEdittingComentToMainPage,
+
+    // ! Замена сотрудников
+
+    isReplaceEmployeeActive,
+    openModalEmployeeReplacement,
+    closeEmployeeReplacement,
   };
 });
 
