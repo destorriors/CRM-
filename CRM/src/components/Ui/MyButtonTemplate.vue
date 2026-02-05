@@ -17,6 +17,8 @@ const props = defineProps({
   </button>
 </template>
 
+<!-- Перед электроном -->
+
 <style scoped>
 .add {
   border-radius: 8px;
